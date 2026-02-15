@@ -30,11 +30,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,12 +52,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -65,6 +75,7 @@ fun App(
   focusRequester: FocusRequester,
   onDispose: () -> Unit,
 ) {
+  val actionItemHeightPx = with(LocalDensity.current) { ActionItemHeight.toPx() }
   val viewModel = remember { AppViewModel(engine) }
   val state: AppViewModel.State by viewModel.state.collectAsState()
   Box(
@@ -85,13 +96,35 @@ fun App(
         focusRequester = focusRequester,
       )
 
-      Column(
+      val lazyListState = rememberLazyListState()
+      LazyColumn(
         modifier = Modifier
-          .background(color = Color.LightGray),
+          .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
+        state = lazyListState,
       ) {
-        for (action in state.actions) {
-          val selected = state.selectedAction == action
-          Action(action, selected)
+        items(state.actions) { action ->
+          val bringIntoViewRequester = remember { BringIntoViewRequester() }
+          Box(
+            modifier = Modifier
+              .bringIntoViewRequester(bringIntoViewRequester),
+          ) {
+            val isSelected = state.selectedAction == action
+            if (isSelected) {
+              LaunchedEffect(Unit) {
+                bringIntoViewRequester.bringIntoView(Rect(Offset(0F, -actionItemHeightPx), Size(0F, actionItemHeightPx * 3)))
+              }
+            }
+            ActionItem(action = action, selected = isSelected)
+          }
+        }
+      }
+      LaunchedEffect(state.selectedAction) {
+        val selectedActionIndex = state.actions.indexOf(state.selectedAction)
+        if (selectedActionIndex != -1) {
+          val visible = lazyListState.layoutInfo.visibleItemsInfo.any { it.index == selectedActionIndex }
+          if (!visible) {
+            lazyListState.scrollToItem(selectedActionIndex)
+          }
         }
       }
     }
@@ -116,7 +149,7 @@ private fun QueryField(
   }
   BasicTextField(
     modifier = Modifier
-      .background(color = Color.White)
+      .background(color = MaterialTheme.colorScheme.background)
       .padding(4.dp)
       .fillMaxWidth()
       .focusRequester(focusRequester)
@@ -155,9 +188,13 @@ private fun QueryField(
           }
         }
       },
-    textStyle = LocalTextStyle.current.copy(fontSize = 32.sp),
+    textStyle = LocalTextStyle.current.copy(
+      color = OutlinedTextFieldDefaults.colors().focusedTextColor,
+      fontSize = 32.sp,
+    ),
     value = queryFieldValue,
     singleLine = true,
+    cursorBrush = SolidColor(OutlinedTextFieldDefaults.colors().cursorColor),
     onValueChange = { textFieldValue ->
       queryFieldValue = textFieldValue
       onQueryChanged(textFieldValue.text)
@@ -170,7 +207,7 @@ private fun QueryField(
 
 
 @Composable
-private fun Action(action: Action, selected: Boolean) {
+private fun ActionItem(action: Action, selected: Boolean) {
   val colors = if (selected) {
     ListItemDefaults.colors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
   } else {

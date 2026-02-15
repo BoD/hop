@@ -66,8 +66,6 @@ class AppViewModel(
     )
 
   fun setQuery(query: String) {
-//    val query = query.trim()
-//    if (query == engine.query.value) return
     selectedAction.value = null
     engine.query.value = query
   }
@@ -81,7 +79,7 @@ class AppViewModel(
   }
 
   private fun moveSelectedAction(direction: Int) {
-    val actions = state.value.actions
+    val actions = state.value.actions.ifEmpty { return }
     val currentIndex = actions.indexOf(state.value.selectedAction)
     this.selectedAction.value = actions[if (currentIndex == -1) 0 else (currentIndex + direction).mod(actions.size)]
   }

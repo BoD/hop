@@ -34,7 +34,7 @@ import java.awt.Insets
 import java.awt.Toolkit
 
 fun getScreenSize(accountInsets: Boolean = false): DpSize {
-  // Note, since the Compose density is equal to the AWT scaleX, we don't need to multiply by graphicsConfiguration.defaultTransform.scaleX to get dp values.
+  // Note: since the Compose density is equal to the AWT scaleX, we don't need to multiply by graphicsConfiguration.defaultTransform.scaleX to get dp values.
   // The values unscaled are already in dp.
   val graphicsConfiguration = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
   val screenInsets: Insets = if (accountInsets) {
@@ -52,7 +52,7 @@ fun getWindowPosition(
   width: Dp,
   height: Dp,
   topPercent: Float,
-):WindowPosition {
+): WindowPosition {
   val screenSize = getScreenSize(accountInsets = true)
   val x = (screenSize.width - width) / 2
   val y = (screenSize.height - height) * topPercent
