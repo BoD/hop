@@ -221,10 +221,12 @@ private fun ActionItem(action: Action, selected: Boolean) {
         text = action.primaryText,
       )
     },
-    supportingContent = {
-      Text(
-        text = action.secondaryText ?: "",
-      )
+    supportingContent = action.secondaryText?.let {
+      {
+        Text(
+          text = action.secondaryText ?: "",
+        )
+      }
     },
     colors = colors,
   )

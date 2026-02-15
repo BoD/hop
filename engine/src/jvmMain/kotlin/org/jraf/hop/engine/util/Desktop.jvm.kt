@@ -27,7 +27,12 @@ package org.jraf.hop.engine.util
 
 import java.awt.Desktop
 import java.io.File
+import java.net.URI
 
 actual fun openApplication(file: String) {
   Desktop.getDesktop().open(File(file));
+}
+
+actual fun openUrl(url: String) {
+  Desktop.getDesktop().browse(URI(url))
 }

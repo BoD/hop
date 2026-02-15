@@ -23,8 +23,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jraf.hop.engine.util
+package org.jraf.hop.engine.action.websearch
 
-expect fun openApplication(file: String)
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import org.jraf.hop.engine.action.Action
+import org.jraf.hop.engine.action.ActionProvider
+import org.jraf.hop.engine.util.openUrl
+import org.jraf.hop.engine.util.urlEncoded
 
-expect fun openUrl(url: String)
+class WebSearchActionProvider : ActionProvider {
+  override fun provide(query: String): Flow<List<Action>> {
+    return flowOf(listOf(WebSearchAction(query)))
+  }
+}
+
+data class WebSearchAction(val searchTerm: String) : Action {
+  override val primaryText: String = "Search \"$searchTerm\" on Google"
+  override val secondaryText: String? = null
+
+  override suspend fun execute() {
+    openUrl("https://www.google.com/search?q=${searchTerm.urlEncoded()}")
+  }
+}

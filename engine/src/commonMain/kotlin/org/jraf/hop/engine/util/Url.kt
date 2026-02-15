@@ -25,6 +25,4 @@
 
 package org.jraf.hop.engine.util
 
-expect fun openApplication(file: String)
-
-expect fun openUrl(url: String)
+expect fun String.urlEncoded(): String

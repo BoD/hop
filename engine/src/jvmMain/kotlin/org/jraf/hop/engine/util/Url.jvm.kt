@@ -25,6 +25,8 @@
 
 package org.jraf.hop.engine.util
 
-expect fun openApplication(file: String)
+import java.net.URLEncoder
 
-expect fun openUrl(url: String)
+actual fun String.urlEncoded(): String {
+  return URLEncoder.encode(this, Charsets.UTF_8.name())
+}
