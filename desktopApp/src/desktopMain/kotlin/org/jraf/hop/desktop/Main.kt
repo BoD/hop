@@ -37,10 +37,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
@@ -49,10 +45,16 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tulskiy.keymaster.common.Provider
+import hop.ui.generated.resources.Res
+import hop.ui.generated.resources.hop
+import org.jetbrains.compose.resources.painterResource
+import org.jraf.hop.action.Action
+import org.jraf.hop.action.app.AppActionProvider
+import org.jraf.hop.action.bookmark.BookmarkActionProvider
+import org.jraf.hop.action.websearch.WebSearchActionProvider
 import org.jraf.hop.desktop.util.getScreenSize
 import org.jraf.hop.desktop.util.getWindowPosition
 import org.jraf.hop.engine.Engine
-import org.jraf.hop.engine.action.Action
 import org.jraf.hop.ui.ActionItemHeight
 import org.jraf.hop.ui.App
 import org.jraf.hop.ui.QueryFieldHeight
@@ -65,15 +67,55 @@ import javax.swing.SwingUtilities
 private val WindowWidth = 800.dp
 
 fun main() {
+  System.setProperty("apple.awt.UIElement", "true")
+  System.setProperty("apple.awt.enableTemplateImages", "true")
+
   val hotKeyProvider = Provider.getCurrentProvider(false)
   val screenSize = getScreenSize()
-  val engine = Engine()
+  val engine = Engine(
+    listOf(
+      AppActionProvider(),
+      BookmarkActionProvider(
+        BookmarkActionProvider.Configuration(
+          pathToBrowser = "/Users/bod/Library/Application Support/BraveSoftware/Brave-Browser",
+          icon = BookmarkActionProvider.Configuration.Icon.Bundled.Brave,
+        ),
+      ),
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
+          name = "GitHub",
+          shortcut = "gh",
+          primaryTextPattern = "Search for '{}'",
+          urlPattern = "https://github.com/search?q={}&type=code",
+          icon = WebSearchActionProvider.Configuration.Icon.Url("https://github.githubassets.com/favicons/favicon.png"),
+        ),
+      ),
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
+          name = "Apollo Kotlin",
+          shortcut = "pr",
+          primaryTextPattern = "Open Apollo Kotlin PR #{}",
+          urlPattern = "https://github.com/apollographql/apollo-kotlin/pull/{}",
+          icon = WebSearchActionProvider.Configuration.Icon.Url("https://avatars.githubusercontent.com/u/17189275?s=48&v=4"),
+        ),
+      ),
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
+          name = "Google",
+          shortcut = null,
+          primaryTextPattern = "Search for '{}'",
+          urlPattern = "https://www.google.com/search?q={}",
+          icon = WebSearchActionProvider.Configuration.Icon.Bundled.Google,
+        ),
+      ),
+    ),
+  )
   application {
     MaterialTheme(if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
 
       var isVisible by remember { mutableStateOf(true) }
       // Global hot-key
-      hotKeyProvider.register(KeyStroke.getKeyStroke("control SPACE")) {
+      hotKeyProvider.register(KeyStroke.getKeyStroke("meta SPACE")) {
         isVisible = !isVisible
       }
 
@@ -138,7 +180,8 @@ fun main() {
       }
 
       Tray(
-        TrayIcon,
+//        TintPainter(painterResource(Res.drawable.hop), ColorFilter.tint(Color.White)),
+        painterResource(Res.drawable.hop),
         tooltip = "Counter",
         onAction = {
           isVisible = !isVisible
@@ -151,10 +194,20 @@ fun main() {
   }
 }
 
-object TrayIcon : Painter() {
-  override val intrinsicSize = Size(64f, 64f)
+//object TrayIcon : Painter() {
+//  override val intrinsicSize = Size(64f, 64f)
+//
+//  override fun DrawScope.onDraw() {
+//    drawOval(Color(0xFFFFFF00))
+//  }
+//}
 
-  override fun DrawScope.onDraw() {
-    drawOval(Color(0xFFFFFF00))
-  }
-}
+//class TintPainter(private val wrapped: Painter, private val colorFilter: ColorFilter) : Painter() {
+//  override val intrinsicSize = Size(128f, 128f)
+//
+//  override fun DrawScope.onDraw() {
+//    with(wrapped) {
+//      draw(Size(32f, 32f), colorFilter = colorFilter)
+//    }
+//  }
+//}

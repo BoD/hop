@@ -19,10 +19,14 @@ kotlin {
         implementation(compose.desktop.currentOs)
         implementation(libs.kotlinx.coroutines.swing)
 
+        // TODO Version catalog
         implementation("com.github.tulskiy:jkeymaster:1.3")
         implementation("net.java.dev.jna:jna:5.18.1")
 
 
+        implementation(project(":action-app"))
+        implementation(project(":action-bookmark"))
+        implementation(project(":action-webSearch"))
         implementation(project(":ui"))
       }
     }

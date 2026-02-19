@@ -21,20 +21,15 @@ val generateVersionKtTask: TaskProvider<Task> = tasks.register("generateVersionK
 
 kotlin {
   jvm()
+  macosArm64()
 
   sourceSets {
     commonMain {
       kotlin.srcDir(generateVersionKtTask)
 
       dependencies {
-        implementation(libs.kotlinx.coroutines.core)
-      }
-    }
-
-    jvmMain {
-      dependencies {
-        implementation(libs.androidx.datastore)
-        implementation(libs.androidx.datastore.preferences)
+        api(libs.kotlinx.coroutines.core)
+        api(project(":action-api"))
       }
     }
   }

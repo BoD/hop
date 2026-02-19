@@ -35,6 +35,10 @@ plugins {
 }
 
 include(
+  ":action-api",
+  ":action-app",
+  ":action-webSearch",
+  ":action-bookmark",
   ":engine",
   ":ui",
   ":desktopApp",

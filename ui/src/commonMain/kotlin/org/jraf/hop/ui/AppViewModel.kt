@@ -33,8 +33,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import org.jraf.hop.action.Action
 import org.jraf.hop.engine.Engine
-import org.jraf.hop.engine.action.Action
 
 class AppViewModel(
   private val engine: Engine,

@@ -8,6 +8,7 @@ plugins {
 
 kotlin {
   jvm()
+  macosArm64()
 
   sourceSets {
     commonMain {
@@ -17,12 +18,16 @@ kotlin {
         api(libs.compose.material3)
         api(libs.compose.ui)
         implementation(libs.compose.components.resources)
-        implementation(libs.compose.uiToolingPreview)
+        implementation(libs.compose.ui.toolingPreview)
 
         api(project(":engine"))
       }
     }
   }
+}
+
+compose.resources {
+  publicResClass = true
 }
 
 tapmoc {

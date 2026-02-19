@@ -25,19 +25,24 @@
 
 package org.jraf.hop.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -66,8 +71,11 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import hop.ui.generated.resources.Res
+import hop.ui.generated.resources.hop
+import org.jetbrains.compose.resources.painterResource
+import org.jraf.hop.action.Action
 import org.jraf.hop.engine.Engine
-import org.jraf.hop.engine.action.Action
 
 @Composable
 fun App(
@@ -102,7 +110,7 @@ fun App(
           .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
         state = lazyListState,
       ) {
-        items(state.actions) { action ->
+        items(state.actions, key = { it.id }) { action ->
           val bringIntoViewRequester = remember { BringIntoViewRequester() }
           Box(
             modifier = Modifier
@@ -215,16 +223,39 @@ private fun ActionItem(action: Action, selected: Boolean) {
   }
   ListItem(
     modifier = Modifier
+      .heightIn(min = ActionItemHeight)
       .fillMaxWidth(),
     headlineContent = {
       Text(
         text = action.primaryText,
+        maxLines = 1,
       )
     },
     supportingContent = action.secondaryText?.let {
       {
         Text(
-          text = action.secondaryText ?: "",
+          text = action.secondaryText!!,
+          maxLines = 1,
+        )
+      }
+    },
+    leadingContent = {
+      val icon = action.icon
+      if (icon == null) {
+        Icon(
+          modifier = Modifier.size(40.dp),
+          painter = painterResource(Res.drawable.hop),
+          contentDescription = null,
+          tint = LocalContentColor.current.copy(alpha = 0.38f),
+        )
+      } else {
+        Image(
+          modifier = Modifier.size(40.dp),
+          painter = when (icon) {
+            is Action.Icon.PainterIcon -> icon.painter
+            is Action.Icon.ResourceIcon -> painterResource(icon.resource)
+          },
+          contentDescription = null,
         )
       }
     },

@@ -32,38 +32,37 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
-import org.jraf.hop.engine.action.Action
-import org.jraf.hop.engine.action.ActionProvider
-import org.jraf.hop.engine.action.app.AppActionProvider
-import org.jraf.hop.engine.action.websearch.WebSearchActionProvider
+import org.jraf.hop.action.Action
+import org.jraf.hop.action.ActionProvider
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class Engine {
+class Engine(
+  private val actionProviders: List<ActionProvider>,
+) {
   private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
   val query: MutableStateFlow<String> = MutableStateFlow("")
 
-  private val actionProviders: List<ActionProvider> = listOf(
-    AppActionProvider(),
-    WebSearchActionProvider(),
-  )
-
   val actions: Flow<List<Action>> = query
-    .map { query -> query.trim() }
+    .map { query -> query.trimStart() }
     .distinctUntilChanged()
     .flatMapLatest { query ->
       if (query.isBlank()) {
         flowOf(emptyList())
       } else {
-        // TODO We look only at the first emission of each provider!
-        flowOf(actionProviders.flatMap { it.provide(query).first() })
+        combine(
+          actionProviders
+            .map { it.provide(query) },
+        ) { actionsList ->
+          actionsList.flatMap { it }
+        }
       }
     }
     .shareIn(coroutineScope, SharingStarted.Lazily)
