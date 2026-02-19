@@ -13,16 +13,13 @@ kotlin {
         api(project(":action-api"))
         implementation(libs.klibnanolog)
         implementation(libs.kotlinx.io.core)
-
-        // TODO version catalog
-        implementation("com.getiox.plist:plist:0.0.2")
+        implementation(libs.plist)
       }
     }
 
     jvmMain {
       dependencies {
-        // TODO version catalog
-        implementation("com.github.gino0631:icns-core:1.2")
+        implementation(libs.icns)
       }
     }
   }
