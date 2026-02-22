@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -9,7 +10,14 @@ plugins {
 }
 
 kotlin {
-  jvm("desktop")
+  jvm("desktop") {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    binaries {
+      executable {
+        mainClass.set("org.jraf.hop.desktopapp.MainKt")
+      }
+    }
+  }
 
   sourceSets {
     val desktopMain by getting
@@ -17,12 +25,14 @@ kotlin {
     desktopMain.apply {
       dependencies {
         implementation(compose.desktop.currentOs)
+        implementation(libs.compose.components.resources)
         implementation(libs.kotlinx.coroutines.swing)
         implementation(libs.jkeymaster)
         implementation(libs.jna)
 
         implementation(project(":action-app"))
         implementation(project(":action-bookmark"))
+        implementation(project(":action-url"))
         implementation(project(":action-webSearch"))
         implementation(project(":ui"))
       }
@@ -49,6 +59,10 @@ compose.desktop {
       }
     }
   }
+}
+
+compose.resources {
+  generateResClass = always
 }
 
 tapmoc {

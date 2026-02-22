@@ -71,11 +71,11 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import hop.ui.generated.resources.Res
-import hop.ui.generated.resources.hop
 import org.jetbrains.compose.resources.painterResource
 import org.jraf.hop.action.Action
 import org.jraf.hop.engine.Engine
+import org.jraf.hop.ui.generated.resources.Res
+import org.jraf.hop.ui.generated.resources.hop
 
 @Composable
 fun App(
@@ -86,53 +86,51 @@ fun App(
   val actionItemHeightPx = with(LocalDensity.current) { ActionItemHeight.toPx() }
   val viewModel = remember { AppViewModel(engine) }
   val state: AppViewModel.State by viewModel.state.collectAsState()
-  Box(
+  Column(
     Modifier
       .fillMaxWidth(),
   ) {
-    Column {
-      QueryField(
-        queryText = state.query,
-        onQueryChanged = viewModel::setQuery,
-        onKeyboardDown = viewModel::selectNextAction,
-        onKeyboardUp = viewModel::selectPreviousAction,
-        onKeyboardEscape = { onDispose() },
-        onKeyboardEnter = {
-          viewModel.executeAction()
-          onDispose()
-        },
-        focusRequester = focusRequester,
-      )
+    QueryField(
+      queryText = state.query,
+      onQueryChanged = viewModel::setQuery,
+      onKeyboardDown = viewModel::selectNextAction,
+      onKeyboardUp = viewModel::selectPreviousAction,
+      onKeyboardEscape = { onDispose() },
+      onKeyboardEnter = {
+        viewModel.executeAction()
+        onDispose()
+      },
+      focusRequester = focusRequester,
+    )
 
-      val lazyListState = rememberLazyListState()
-      LazyColumn(
-        modifier = Modifier
-          .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
-        state = lazyListState,
-      ) {
-        items(state.actions, key = { it.id }) { action ->
-          val bringIntoViewRequester = remember { BringIntoViewRequester() }
-          Box(
-            modifier = Modifier
-              .bringIntoViewRequester(bringIntoViewRequester),
-          ) {
-            val isSelected = state.selectedAction == action
-            if (isSelected) {
-              LaunchedEffect(Unit) {
-                bringIntoViewRequester.bringIntoView(Rect(Offset(0F, -actionItemHeightPx), Size(0F, actionItemHeightPx * 3)))
-              }
+    val lazyListState = rememberLazyListState()
+    LazyColumn(
+      modifier = Modifier
+        .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
+      state = lazyListState,
+    ) {
+      items(state.actions, key = { it.id }) { action ->
+        val bringIntoViewRequester = remember { BringIntoViewRequester() }
+        Box(
+          modifier = Modifier
+            .bringIntoViewRequester(bringIntoViewRequester),
+        ) {
+          val isSelected = state.selectedAction == action
+          if (isSelected) {
+            LaunchedEffect(Unit) {
+              bringIntoViewRequester.bringIntoView(Rect(Offset(0F, -actionItemHeightPx), Size(0F, actionItemHeightPx * 3)))
             }
-            ActionItem(action = action, selected = isSelected)
           }
+          ActionItem(action = action, selected = isSelected)
         }
       }
-      LaunchedEffect(state.selectedAction) {
-        val selectedActionIndex = state.actions.indexOf(state.selectedAction)
-        if (selectedActionIndex != -1) {
-          val visible = lazyListState.layoutInfo.visibleItemsInfo.any { it.index == selectedActionIndex }
-          if (!visible) {
-            lazyListState.scrollToItem(selectedActionIndex)
-          }
+    }
+    LaunchedEffect(state.selectedAction) {
+      val selectedActionIndex = state.actions.indexOf(state.selectedAction)
+      if (selectedActionIndex != -1) {
+        val visible = lazyListState.layoutInfo.visibleItemsInfo.any { it.index == selectedActionIndex }
+        if (!visible) {
+          lazyListState.scrollToItem(selectedActionIndex)
         }
       }
     }
@@ -157,7 +155,7 @@ private fun QueryField(
   }
   BasicTextField(
     modifier = Modifier
-      .background(color = MaterialTheme.colorScheme.background)
+      .background(color = MaterialTheme.colorScheme.surface)
       .padding(4.dp)
       .fillMaxWidth()
       .focusRequester(focusRequester)

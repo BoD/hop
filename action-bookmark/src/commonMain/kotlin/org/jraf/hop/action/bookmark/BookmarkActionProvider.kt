@@ -26,15 +26,7 @@
 package org.jraf.hop.action.bookmark
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import hop.action_bookmark.generated.resources.Res
-import hop.action_bookmark.generated.resources.brave
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.readRawBytes
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.files.Path
@@ -42,7 +34,11 @@ import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
 import org.jraf.hop.action.bookmark.util.lastModified
-import org.jraf.hop.action.bookmark.util.openUrl
+import org.jraf.hop.action.util.iconCache
+import org.jraf.hop.action.util.openUrl
+import org.jraf.hop.action.util.suspendRunCatching
+import org.jraf.hop.action_bookmark.generated.resources.Res
+import org.jraf.hop.action_bookmark.generated.resources.brave
 import org.jraf.klibnanolog.logd
 import org.jraf.klibnanolog.logw
 import kotlin.time.Instant
@@ -50,12 +46,6 @@ import kotlin.time.Instant
 class BookmarkActionProvider(
   private val configuration: Configuration,
 ) : ActionProvider {
-  private class CachedIcon(
-    val icon: ImageBitmap?,
-  )
-
-  private var cachedIcon: CachedIcon? = null
-
   private class CachedBookmarks(
     val bookmarks: List<UrlNode>,
     val fileLastModified: Instant,
@@ -67,11 +57,22 @@ class BookmarkActionProvider(
     return flow {
       ensureBookmarksLoaded()
       val cachedBookmarks = cachedBookmarks ?: return@flow
-      emit(
-        cachedBookmarks.bookmarks
-          .filter { it.name.contains(query, ignoreCase = true) || it.name.contains(query, ignoreCase = true) }
-          .map { urlNode -> BookmarkAction(configuration, urlNode) },
-      )
+      val bookmarks = cachedBookmarks.bookmarks
+        .filter { it.name.contains(query, ignoreCase = true) || it.url.contains(query, ignoreCase = true) }
+      if (bookmarks.isEmpty()) {
+        emit(emptyList())
+      } else {
+        if (configuration.icon is Configuration.Icon.Url) {
+          if (!iconCache.isCached(configuration.icon.url)) {
+            // Quickly emit the results without the icon
+            emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
+          }
+          // (Re-)emit the result with the cached icon
+          emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode, iconBitmap = iconCache.get(configuration.icon.url)) })
+        } else {
+          emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
+        }
+      }
     }
   }
 
@@ -92,34 +93,13 @@ class BookmarkActionProvider(
   }
 
   private suspend fun loadBookmarks() {
-    runCatching {
+    suspendRunCatching {
       logd("Loading bookmarks from ${configuration.bookmarksFilePath}")
       val bookmarks = loadBookmarks(configuration.bookmarksFilePath)
       val lastModified = configuration.bookmarksFilePath.lastModified()!!
       cachedBookmarks = CachedBookmarks(bookmarks, lastModified)
     }.onFailure {
       logw(it, "Failed to load bookmarks from ${configuration.bookmarksFilePath}")
-    }
-  }
-
-  private val httpClient by lazy {
-    HttpClient()
-  }
-
-  private suspend fun downloadIcon(url: String) {
-    runCatching {
-      val response: HttpResponse = httpClient.get(url)
-      if (!response.status.isSuccess()) {
-        logw("Failed to download icon at $url: ${response.status.description}")
-        cachedIcon = CachedIcon(null)
-      } else {
-        val bytes = response.readRawBytes()
-        val icon = bytes.decodeToImageBitmap()
-        cachedIcon = CachedIcon(icon)
-      }
-    }.onFailure {
-      logw(it, "Failed to download icon at $url")
-      cachedIcon = CachedIcon(null)
     }
   }
 
@@ -136,7 +116,7 @@ class BookmarkActionProvider(
     }
   }
 
-  private val Configuration.bookmarksFilePath get() = Path(configuration.pathToBrowser, "Default", "Bookmarks")
+  private val Configuration.bookmarksFilePath get() = Path(pathToBrowser, "Default", "Bookmarks")
 }
 
 private data class BookmarkAction(

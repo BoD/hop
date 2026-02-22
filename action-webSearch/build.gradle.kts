@@ -13,10 +13,9 @@ kotlin {
     commonMain {
       dependencies {
         api(project(":action-api"))
+        implementation(project(":action-util"))
         implementation(libs.compose.components.resources)
         implementation(libs.klibnanolog)
-        implementation(libs.ktor.client.core)
-        implementation(libs.ktor.client.cio)
       }
     }
   }

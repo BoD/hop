@@ -26,53 +26,36 @@
 package org.jraf.hop.action.websearch
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import hop.action_websearch.generated.resources.Res
-import hop.action_websearch.generated.resources.google
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.readRawBytes
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.util.iconCache
+import org.jraf.hop.action.util.openUrl
+import org.jraf.hop.action.util.urlEncoded
 import org.jraf.hop.action.websearch.WebSearchActionProvider.Configuration.Icon
-import org.jraf.hop.action.websearch.util.openUrl
-import org.jraf.hop.action.websearch.util.urlEncoded
-import org.jraf.klibnanolog.logw
+import org.jraf.hop.action_websearch.generated.resources.Res
+import org.jraf.hop.action_websearch.generated.resources.google
 
 class WebSearchActionProvider(
   private val configuration: Configuration,
 ) : ActionProvider {
-  private class CachedIcon(
-    val icon: ImageBitmap?,
-  )
-
-  private var cachedIcon: CachedIcon? = null
-
   override fun provide(query: String): Flow<List<Action>> {
     return if (configuration.shortcut != null) {
       if (query.startsWith(configuration.shortcut + " ", ignoreCase = true)) {
         val query = query.removePrefix(configuration.shortcut + " ").trim()
         if (configuration.icon is Icon.Url) {
-          if (cachedIcon == null) {
-            flow {
+          flow {
+            if (!iconCache.isCached(configuration.icon.url)) {
               // Quickly emit the results without the icon
               emit(listOf(WebSearchAction(configuration, query)))
-
-              // Download the icon
-              downloadIcon(configuration.icon.url)
-
-              // Re-emit the result with the cached icon
-              emit(listOf(WebSearchAction(configuration, query, iconBitmap = cachedIcon!!.icon)))
             }
-          } else {
-            flowOf(listOf(WebSearchAction(configuration, query, iconBitmap = cachedIcon!!.icon)))
+
+            // (Re-)emit the result with the cached icon
+            emit(listOf(WebSearchAction(configuration, query, iconBitmap = iconCache.get(configuration.icon.url))))
           }
         } else {
           flowOf(listOf(WebSearchAction(configuration, query)))
@@ -86,27 +69,6 @@ class WebSearchActionProvider(
       } else {
         flowOf(listOf(WebSearchAction(configuration, query)))
       }
-    }
-  }
-
-  private val httpClient by lazy {
-    HttpClient()
-  }
-
-  private suspend fun downloadIcon(url: String) {
-    runCatching {
-      val response: HttpResponse = httpClient.get(url)
-      if (!response.status.isSuccess()) {
-        logw("Failed to download icon at $url: ${response.status.description}")
-        cachedIcon = CachedIcon(null)
-      } else {
-        val bytes = response.readRawBytes()
-        val icon = bytes.decodeToImageBitmap()
-        cachedIcon = CachedIcon(icon)
-      }
-    }.onFailure {
-      logw(it, "Failed to download icon at $url")
-      cachedIcon = CachedIcon(null)
     }
   }
 

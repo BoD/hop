@@ -23,26 +23,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jraf.hop.action.app.util
+package org.jraf.hop.action.util
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.decodeToImageBitmap
-import com.github.gino0631.icns.IcnsIcons
-import kotlinx.io.files.Path
-import org.jraf.hop.action.util.suspendRunCatching
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readRawBytes
+import io.ktor.http.isSuccess
 import org.jraf.klibnanolog.logw
 
-internal actual suspend fun readIcnsIcon(icnsPath: Path): ImageBitmap? {
-  val icons: IcnsIcons = IcnsIcons.load(kotlin.io.path.Path(icnsPath.toString()))
-  val icnsIconsEntries = icons.entries.sortedByDescending { it.type?.ordinal ?: -1 }.ifEmpty { return null }
-  return icnsIconsEntries.firstNotNullOfOrNull { icnsIconsEntry ->
-    if (icnsIconsEntry.type == null) return@firstNotNullOfOrNull null
-    val bytes = icnsIconsEntry.newInputStream().use { inputStream -> inputStream.readBytes() }
+val iconCache: IconCache by lazy { IconCache() }
+
+class IconCache {
+  private val cache = mutableMapOf<String, ImageBitmap?>()
+
+  private val httpClient by lazy {
+    HttpClient()
+  }
+
+  fun isCached(url: String) = cache.containsKey(url)
+
+  suspend fun get(url: String): ImageBitmap? {
+    if (cache.containsKey(url)) return cache[url]
+    downloadIcon(url)
+    return cache[url]
+  }
+
+  private suspend fun downloadIcon(url: String) {
     suspendRunCatching {
-      bytes.decodeToImageBitmap()
+      val response: HttpResponse = httpClient.get(url)
+      if (!response.status.isSuccess()) {
+        logw("Failed to download icon at $url: ${response.status.description}")
+        cache[url] = null
+      } else {
+        val bytes = response.readRawBytes()
+        val icon = bytes.decodeToImageBitmap()
+        cache[url] = icon
+      }
     }.onFailure {
-      logw("Failed to decode ICNS icon at $icnsPath of type ${icnsIconsEntry.type}")
+      logw(it, "Failed to download icon at $url")
+      cache[url] = null
     }
-      .getOrNull()
   }
 }

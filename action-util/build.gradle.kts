@@ -10,6 +10,8 @@ kotlin {
   sourceSets {
     commonMain {
       dependencies {
+        api(libs.kotlinx.io.core)
+        api(libs.compose.ui)
         implementation(libs.klibnanolog)
         implementation(libs.ktor.client.core)
         implementation(libs.ktor.client.cio)

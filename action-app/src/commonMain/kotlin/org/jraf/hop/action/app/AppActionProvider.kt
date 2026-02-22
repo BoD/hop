@@ -37,7 +37,7 @@ import kotlinx.io.files.SystemFileSystem
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
-import org.jraf.hop.action.app.util.openApplication
+import org.jraf.hop.action.util.openApplication
 
 class AppActionProvider : ActionProvider {
   private val macOSAppIconCache = MacOSAppIconCache()
@@ -45,7 +45,8 @@ class AppActionProvider : ActionProvider {
   override fun provide(query: String): Flow<List<Action>> {
     return flow {
       val matchingFiles = withContext(Dispatchers.IO) {
-        SystemFileSystem.list(Path("/Applications"))
+        SystemFileSystem.list(Path("/Applications")) +
+          SystemFileSystem.list(Path("/System/Applications"))
       }.filter { path ->
         path.name.endsWith(".app") && path.name.contains(query, ignoreCase = true)
       }

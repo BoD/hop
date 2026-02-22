@@ -2,7 +2,7 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.compose.multiplatform)
   alias(libs.plugins.compose.compiler)
-  alias(libs.plugins.compose.hotReload)
+  alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.tapmoc)
 }
 
@@ -13,22 +13,13 @@ kotlin {
   sourceSets {
     commonMain {
       dependencies {
-        api(libs.compose.runtime)
-        api(libs.compose.foundation)
-        api(libs.compose.material3)
-        api(libs.compose.ui)
+        api(project(":action-api"))
+        implementation(project(":action-util"))
         implementation(libs.compose.components.resources)
-        implementation(libs.compose.ui.toolingPreview)
-
-        api(project(":engine"))
+        implementation(libs.klibnanolog)
       }
     }
   }
-}
-
-compose.resources {
-  publicResClass = true
-  packageOfResClass = "org.jraf.hop.ui.generated.resources"
 }
 
 tapmoc {

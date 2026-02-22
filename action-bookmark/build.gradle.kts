@@ -14,11 +14,10 @@ kotlin {
     commonMain {
       dependencies {
         api(project(":action-api"))
+        implementation(project(":action-util"))
         implementation(libs.compose.components.resources)
         implementation(libs.klibnanolog)
         implementation(libs.kotlinx.serialization.json)
-        implementation(libs.ktor.client.core)
-        implementation(libs.ktor.client.cio)
         implementation(libs.kotlinx.io.core)
       }
     }

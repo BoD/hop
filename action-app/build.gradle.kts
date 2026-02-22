@@ -11,6 +11,7 @@ kotlin {
     commonMain {
       dependencies {
         api(project(":action-api"))
+        implementation(project(":action-util"))
         implementation(libs.klibnanolog)
         implementation(libs.kotlinx.io.core)
         implementation(libs.plist)

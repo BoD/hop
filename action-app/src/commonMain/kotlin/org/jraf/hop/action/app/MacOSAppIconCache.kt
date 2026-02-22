@@ -39,6 +39,7 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readByteArray
 import org.jraf.hop.action.app.util.readIcnsIcon
+import org.jraf.hop.action.util.suspendRunCatching
 import org.jraf.klibnanolog.logd
 import org.jraf.klibnanolog.logw
 
@@ -97,7 +98,7 @@ internal class MacOSAppIconCache {
   }
 
   private suspend fun getIconFromBundle(applicationPath: Path): ImageBitmap? {
-    val pListValue = runCatching {
+    val pListValue = suspendRunCatching {
       PList.decode(
         SystemFileSystem.source(Path(applicationPath, "Contents", "Info.plist")).buffered().use { it.readByteArray() },
       )
