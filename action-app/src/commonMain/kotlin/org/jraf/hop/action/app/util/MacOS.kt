@@ -28,4 +28,6 @@ package org.jraf.hop.action.app.util
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.io.files.Path
 
-internal expect suspend fun readIcnsIcon(icnsPath: Path): ImageBitmap?
+internal expect fun getMacOSAppIcon(applicationPath: Path): ImageBitmap?
+
+internal expect fun getMacOSAllApplications(): Set<Path>

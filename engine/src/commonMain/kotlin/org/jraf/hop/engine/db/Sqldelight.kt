@@ -23,28 +23,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jraf.hop.action.app
+package org.jraf.hop.engine.db
 
-import androidx.compose.ui.graphics.ImageBitmap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
-import kotlinx.io.files.Path
-import org.jraf.hop.action.app.util.getMacOSAppIcon
+import app.cash.sqldelight.db.SqlDriver
 
-internal class MacOSAppIconCache {
-  private val cache = mutableMapOf<Path, ImageBitmap?>()
-
-  fun isCached(applicationPath: Path): Boolean {
-    return cache.containsKey(applicationPath)
-  }
-
-  suspend fun getIcon(applicationPath: Path): ImageBitmap? {
-    if (cache.containsKey(applicationPath)) {
-      return cache[applicationPath]
-    }
-    val imageBitmap = withContext(Dispatchers.IO) { getMacOSAppIcon(applicationPath) }
-    cache[applicationPath] = imageBitmap
-    return imageBitmap
-  }
-}
+internal expect fun createSqlDriver(): SqlDriver

@@ -26,23 +26,12 @@
 package org.jraf.hop.action.app.util
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.decodeToImageBitmap
-import com.github.gino0631.icns.IcnsIcons
 import kotlinx.io.files.Path
-import org.jraf.hop.action.util.suspendRunCatching
-import org.jraf.klibnanolog.logw
 
-internal actual suspend fun readIcnsIcon(icnsPath: Path): ImageBitmap? {
-  val icons: IcnsIcons = IcnsIcons.load(kotlin.io.path.Path(icnsPath.toString()))
-  val icnsIconsEntries = icons.entries.sortedByDescending { it.type?.ordinal ?: -1 }.ifEmpty { return null }
-  return icnsIconsEntries.firstNotNullOfOrNull { icnsIconsEntry ->
-    if (icnsIconsEntry.type == null) return@firstNotNullOfOrNull null
-    val bytes = icnsIconsEntry.newInputStream().use { inputStream -> inputStream.readBytes() }
-    suspendRunCatching {
-      bytes.decodeToImageBitmap()
-    }.onFailure {
-      logw("Failed to decode ICNS icon at $icnsPath of type ${icnsIconsEntry.type}")
-    }
-      .getOrNull()
-  }
+internal actual fun getMacOSAppIcon(applicationPath: Path): ImageBitmap? {
+  return getAppIcon(applicationPath.toString())
+}
+
+internal actual fun getMacOSAllApplications(): Set<Path> {
+  return getAllApplicationPaths().map { Path(it) }.toSet()
 }

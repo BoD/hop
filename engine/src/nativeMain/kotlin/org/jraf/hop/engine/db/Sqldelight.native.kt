@@ -23,10 +23,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jraf.hop.action.app.util
+package org.jraf.hop.engine.db
 
-import kotlinx.io.files.Path
+import app.cash.sqldelight.db.SqlDriver
 
-internal actual fun openApplication(path: Path) {
+internal actual fun createSqlDriver(): SqlDriver {
   TODO("Not yet implemented")
 }

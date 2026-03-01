@@ -25,6 +25,13 @@
 
 package org.jraf.hop.action.app.util
 
-internal actual suspend fun readIcnsIcon(icnsPath: kotlinx.io.files.Path): androidx.compose.ui.graphics.ImageBitmap? {
+import androidx.compose.ui.graphics.ImageBitmap
+import kotlinx.io.files.Path
+
+internal actual fun getMacOSAppIcon(applicationPath: Path): ImageBitmap? {
+  TODO("Not yet implemented")
+}
+
+internal actual fun getMacOSAllApplications(): Set<Path> {
   TODO("Not yet implemented")
 }

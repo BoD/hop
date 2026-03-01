@@ -1,5 +1,6 @@
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.sqldelight)
   alias(libs.plugins.tapmoc)
 }
 
@@ -30,7 +31,25 @@ kotlin {
       dependencies {
         api(libs.kotlinx.coroutines.core)
         api(project(":action-api"))
+
+        implementation(libs.sqldelight.runtime)
+        implementation(libs.sqldelight.coroutines)
       }
+    }
+
+    jvmMain {
+      dependencies {
+        implementation(libs.sqldelight.sqlite)
+      }
+    }
+  }
+}
+
+sqldelight {
+  databases {
+    register("HopDatabase") {
+      packageName.set("org.jraf.hop.engine.db")
+      schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
     }
   }
 }
@@ -40,3 +59,5 @@ tapmoc {
   kotlin("2.3.10")
   checkDependencies()
 }
+
+// `./gradlew generateCommonMainHopDatabaseSchema` to generate the database schema (results in `src/commonMain/sqldelight/databases/`)

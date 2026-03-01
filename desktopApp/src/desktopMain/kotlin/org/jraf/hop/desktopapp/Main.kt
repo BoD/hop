@@ -25,10 +25,6 @@
 
 package org.jraf.hop.desktopapp
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,7 +63,7 @@ import java.awt.event.WindowEvent
 import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 
-private val WindowWidth = 800.dp
+private val WindowWidth = 640.dp
 
 fun main() {
   System.setProperty("apple.awt.UIElement", "true")
@@ -119,86 +115,83 @@ fun main() {
     ),
   )
   application {
-    MaterialTheme(if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+    var isVisible by remember { mutableStateOf(true) }
+    // Global hot-key
+    hotKeyProvider.register(KeyStroke.getKeyStroke("meta SPACE")) {
+      isVisible = !isVisible
+    }
 
-      var isVisible by remember { mutableStateOf(true) }
-      // Global hot-key
-      hotKeyProvider.register(KeyStroke.getKeyStroke("meta SPACE")) {
-        isVisible = !isVisible
-      }
+    val windowState = rememberWindowState(
+      size = DpSize(WindowWidth, QueryFieldHeight),
+      position = getWindowPosition(WindowWidth, QueryFieldHeight, .33F),
+    )
+    if (isVisible) {
+      Window(
+        state = windowState,
+        undecorated = true,
+        transparent = true,
+        title = stringResource(Res.string.app_name),
+        onCloseRequest = {
+          exitApplication()
+        },
+      ) {
+        // Adjust the size of the window based on the number of actions
+        val actions: List<Action> by engine.actions.collectAsState(emptyList())
+        LaunchedEffect(actions) {
+          val heightBasedOnActions = QueryFieldHeight + actions.size * ActionItemHeight
+          val maxHeight = screenSize.height - window.location.y.dp
+          val height = heightBasedOnActions.coerceAtMost(maxHeight)
+          windowState.size = DpSize(window.preferredSize.width.dp, height)
+        }
 
-      val windowState = rememberWindowState(
-        size = DpSize(WindowWidth, QueryFieldHeight),
-        position = getWindowPosition(WindowWidth, QueryFieldHeight, .33F),
-      )
-      if (isVisible) {
-        Window(
-          state = windowState,
-          undecorated = true,
-          transparent = true,
-          title = stringResource(Res.string.app_name),
-          onCloseRequest = {
-            exitApplication()
+        val focusRequester = remember { FocusRequester() }
+        App(
+          engine = engine,
+          focusRequester = focusRequester,
+          onDispose = {
+            isVisible = false
           },
-        ) {
-          // Adjust the size of the window based on the number of actions
-          val actions: List<Action> by engine.actions.collectAsState(emptyList())
-          LaunchedEffect(actions) {
-            val heightBasedOnActions = QueryFieldHeight + actions.size * ActionItemHeight
-            val maxHeight = screenSize.height - window.location.y.dp
-            val height = heightBasedOnActions.coerceAtMost(maxHeight)
-            windowState.size = DpSize(window.preferredSize.width.dp, height)
-          }
+        )
 
-          val focusRequester = remember { FocusRequester() }
-          App(
-            engine = engine,
-            focusRequester = focusRequester,
-            onDispose = {
+        // See https://youtrack.jetbrains.com/issue/CMP-4231
+        DisposableEffect(window) {
+          val listener = object : WindowAdapter() {
+            override fun windowActivated(e: WindowEvent) {
+              SwingUtilities.invokeLater {
+                focusRequester.requestFocus()
+              }
+            }
+
+            override fun windowDeactivated(e: WindowEvent) {
               isVisible = false
-            },
-          )
-
-          // See https://youtrack.jetbrains.com/issue/CMP-4231
-          DisposableEffect(window) {
-            val listener = object : WindowAdapter() {
-              override fun windowActivated(e: WindowEvent) {
-                SwingUtilities.invokeLater {
-                  focusRequester.requestFocus()
-                }
-              }
-
-              override fun windowDeactivated(e: WindowEvent) {
-                isVisible = false
-              }
-            }
-            window.addWindowListener(listener)
-            onDispose {
-              window.removeWindowListener(listener)
             }
           }
+          window.addWindowListener(listener)
+          onDispose {
+            window.removeWindowListener(listener)
+          }
+        }
 
-          LaunchedEffect(isVisible) {
-            if (isVisible) {
-              Desktop.getDesktop().requestForeground(true)
-            } else {
-              // Reset query when hiding the window
-              engine.query.value = ""
-            }
+        LaunchedEffect(isVisible) {
+          if (isVisible) {
+            Desktop.getDesktop().requestForeground(true)
+          } else {
+            // Reset query when hiding the window
+            engine.query.value = ""
           }
         }
       }
-
-      Tray(
-        painterResource(org.jraf.hop.ui.generated.resources.Res.drawable.hop),
-        tooltip = stringResource(Res.string.app_name),
-        onAction = {
-          isVisible = !isVisible
-        },
-        menu = {
-          Item("Exit", onClick = ::exitApplication)
-        },
-      )
     }
+
+    Tray(
+      painterResource(org.jraf.hop.ui.generated.resources.Res.drawable.hop),
+      tooltip = stringResource(Res.string.app_name),
+      onAction = {
+        isVisible = !isVisible
+      },
+      menu = {
+        Item("Exit", onClick = ::exitApplication)
+      },
+    )
   }
 }

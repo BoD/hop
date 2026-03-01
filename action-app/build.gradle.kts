@@ -14,13 +14,12 @@ kotlin {
         implementation(project(":action-util"))
         implementation(libs.klibnanolog)
         implementation(libs.kotlinx.io.core)
-        implementation(libs.plist)
       }
     }
 
     jvmMain {
       dependencies {
-        implementation(libs.icns)
+        implementation(libs.jna)
       }
     }
   }

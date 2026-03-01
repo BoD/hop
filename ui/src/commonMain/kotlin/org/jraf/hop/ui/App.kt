@@ -25,8 +25,11 @@
 
 package org.jraf.hop.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,6 +50,8 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,6 +66,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -68,6 +74,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,54 +90,56 @@ fun App(
   focusRequester: FocusRequester,
   onDispose: () -> Unit,
 ) {
-  val actionItemHeightPx = with(LocalDensity.current) { ActionItemHeight.toPx() }
-  val viewModel = remember { AppViewModel(engine) }
-  val state: AppViewModel.State by viewModel.state.collectAsState()
-  Column(
-    Modifier
-      .fillMaxWidth(),
-  ) {
-    QueryField(
-      queryText = state.query,
-      onQueryChanged = viewModel::setQuery,
-      onKeyboardDown = viewModel::selectNextAction,
-      onKeyboardUp = viewModel::selectPreviousAction,
-      onKeyboardEscape = { onDispose() },
-      onKeyboardEnter = {
-        viewModel.executeAction()
-        onDispose()
-      },
-      focusRequester = focusRequester,
-    )
-
-    val lazyListState = rememberLazyListState()
-    LazyColumn(
-      modifier = Modifier
-        .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
-      state = lazyListState,
+  MaterialTheme(if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+    val actionItemHeightPx = with(LocalDensity.current) { ActionItemHeight.toPx() }
+    val viewModel = remember { AppViewModel(engine) }
+    val state: AppViewModel.State by viewModel.state.collectAsState()
+    Column(
+      Modifier
+        .fillMaxWidth(),
     ) {
-      items(state.actions, key = { it.id }) { action ->
-        val bringIntoViewRequester = remember { BringIntoViewRequester() }
-        Box(
-          modifier = Modifier
-            .bringIntoViewRequester(bringIntoViewRequester),
-        ) {
-          val isSelected = state.selectedAction == action
-          if (isSelected) {
-            LaunchedEffect(Unit) {
-              bringIntoViewRequester.bringIntoView(Rect(Offset(0F, -actionItemHeightPx), Size(0F, actionItemHeightPx * 3)))
+      QueryField(
+        queryText = state.query,
+        onQueryChanged = viewModel::setQuery,
+        onKeyboardDown = viewModel::selectNextAction,
+        onKeyboardUp = viewModel::selectPreviousAction,
+        onKeyboardEscape = { onDispose() },
+        onKeyboardEnter = {
+          viewModel.executeAction()
+          onDispose()
+        },
+        focusRequester = focusRequester,
+      )
+
+      val lazyListState = rememberLazyListState()
+      LazyColumn(
+        modifier = Modifier
+          .background(color = MaterialTheme.colorScheme.surfaceContainerHighest),
+        state = lazyListState,
+      ) {
+        items(state.actions, key = { it.id }) { action ->
+          val bringIntoViewRequester = remember { BringIntoViewRequester() }
+          Box(
+            modifier = Modifier
+              .bringIntoViewRequester(bringIntoViewRequester),
+          ) {
+            val isSelected = state.selectedAction == action
+            if (isSelected) {
+              LaunchedEffect(Unit) {
+                bringIntoViewRequester.bringIntoView(Rect(Offset(0F, -actionItemHeightPx), Size(0F, actionItemHeightPx * 3)))
+              }
             }
+            ActionItem(action = action, selected = isSelected)
           }
-          ActionItem(action = action, selected = isSelected)
         }
       }
-    }
-    LaunchedEffect(state.selectedAction) {
-      val selectedActionIndex = state.actions.indexOf(state.selectedAction)
-      if (selectedActionIndex != -1) {
-        val visible = lazyListState.layoutInfo.visibleItemsInfo.any { it.index == selectedActionIndex }
-        if (!visible) {
-          lazyListState.scrollToItem(selectedActionIndex)
+      LaunchedEffect(state.selectedAction) {
+        val selectedActionIndex = state.actions.indexOf(state.selectedAction)
+        if (selectedActionIndex != -1) {
+          val visible = lazyListState.layoutInfo.visibleItemsInfo.any { it.index == selectedActionIndex }
+          if (!visible) {
+            lazyListState.scrollToItem(selectedActionIndex)
+          }
         }
       }
     }
@@ -153,64 +162,83 @@ private fun QueryField(
       queryFieldValue = TextFieldValue(queryText, TextRange(queryText.length))
     }
   }
-  BasicTextField(
-    modifier = Modifier
-      .background(color = MaterialTheme.colorScheme.surface)
-      .padding(4.dp)
-      .fillMaxWidth()
-      .focusRequester(focusRequester)
-      .onPreviewKeyEvent {
-        when (it.key) {
-          Key.DirectionDown -> {
-            if (it.type == KeyEventType.KeyDown) {
-              onKeyboardDown()
-            }
-            true
-          }
-
-          Key.DirectionUp -> {
-            if (it.type == KeyEventType.KeyDown) {
-              onKeyboardUp()
-            }
-            true
-          }
-
-          Key.Escape -> {
-            if (it.type == KeyEventType.KeyDown) {
-              onKeyboardEscape()
-            }
-            true
-          }
-
-          Key.Enter -> {
-            if (it.type == KeyEventType.KeyDown) {
-              onKeyboardEnter()
-            }
-            true
-          }
-
-          else -> {
-            false
-          }
-        }
-      },
-    textStyle = LocalTextStyle.current.copy(
-      color = OutlinedTextFieldDefaults.colors().focusedTextColor,
+  val textColor = LocalTextStyle.current.color.takeOrElse { OutlinedTextFieldDefaults.colors().focusedTextColor }
+  val mergedTextStyle = LocalTextStyle.current.merge(
+    TextStyle(
+      color = textColor,
       fontSize = 32.sp,
+      lineHeight = 32.sp,
     ),
-    value = queryFieldValue,
-    singleLine = true,
-    cursorBrush = SolidColor(OutlinedTextFieldDefaults.colors().cursorColor),
-    onValueChange = { textFieldValue ->
-      queryFieldValue = textFieldValue
-      onQueryChanged(textFieldValue.text)
-    },
   )
-  LaunchedEffect(Unit) {
-    focusRequester.requestFocus()
+
+  Box(
+    modifier = Modifier
+      .border(
+        border = BorderStroke(2.dp, SolidColor(MaterialTheme.colorScheme.primary)),
+        shape = OutlinedTextFieldDefaults.shape,
+      )
+      .padding(1.dp)
+      .fillMaxWidth(),
+  ) {
+    Box(
+      modifier = Modifier
+        .background(color = MaterialTheme.colorScheme.surface, shape = OutlinedTextFieldDefaults.shape),
+    ) {
+      BasicTextField(
+        modifier = Modifier
+          .padding(8.dp)
+          .fillMaxWidth()
+          .focusRequester(focusRequester)
+          .onPreviewKeyEvent {
+            when (it.key) {
+              Key.DirectionDown -> {
+                if (it.type == KeyEventType.KeyDown) {
+                  onKeyboardDown()
+                }
+                true
+              }
+
+              Key.DirectionUp -> {
+                if (it.type == KeyEventType.KeyDown) {
+                  onKeyboardUp()
+                }
+                true
+              }
+
+              Key.Escape -> {
+                if (it.type == KeyEventType.KeyDown) {
+                  onKeyboardEscape()
+                }
+                true
+              }
+
+              Key.Enter -> {
+                if (it.type == KeyEventType.KeyDown) {
+                  onKeyboardEnter()
+                }
+                true
+              }
+
+              else -> {
+                false
+              }
+            }
+          },
+        textStyle = mergedTextStyle,
+        value = queryFieldValue,
+        singleLine = true,
+        cursorBrush = SolidColor(OutlinedTextFieldDefaults.colors().cursorColor),
+        onValueChange = { textFieldValue ->
+          queryFieldValue = textFieldValue
+          onQueryChanged(textFieldValue.text)
+        },
+      )
+      LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+      }
+    }
   }
 }
-
 
 @Composable
 private fun ActionItem(action: Action, selected: Boolean) {

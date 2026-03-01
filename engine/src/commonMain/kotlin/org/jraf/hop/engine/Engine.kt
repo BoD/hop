@@ -41,27 +41,33 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.engine.db.LaunchItemRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class Engine(
   private val actionProviders: List<ActionProvider>,
 ) {
   private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+  private val launchItemRepository = LaunchItemRepository()
 
   val query: MutableStateFlow<String> = MutableStateFlow("")
 
-  val actions: Flow<List<Action>> = query
-    .map { query -> query.trimStart() }
-    .distinctUntilChanged()
-    .flatMapLatest { query ->
+  val actions: Flow<List<Action>> = combine(
+    query
+      .map { query -> query.trimStart() }
+      .distinctUntilChanged(),
+    launchItemRepository.counters,
+  ) { query, counters ->
+    query to counters
+  }
+    .flatMapLatest { (query, counters) ->
       if (query.isBlank()) {
         flowOf(emptyList())
       } else {
-        combine(
-          actionProviders
-            .map { it.provide(query) },
-        ) { actionsList ->
-          actionsList.flatMap { it }
+        combine(actionProviders.map { it.provide(query) }) { actionsList ->
+          actionsList
+            .flatMap { it.map { action -> TrackingAction(action) } }
+            .sortedByDescending { counters[it.id]?.combined ?: 0 }
         }
       }
     }
@@ -69,6 +75,13 @@ class Engine(
 
   fun executeAction(action: Action) {
     coroutineScope.launch {
+      action.execute()
+    }
+  }
+
+  private inner class TrackingAction(private val action: Action) : Action by action {
+    override suspend fun execute() {
+      launchItemRepository.recordLaunchedItem(id)
       action.execute()
     }
   }

@@ -27,5 +27,5 @@ package org.jraf.hop.ui
 
 import androidx.compose.ui.unit.dp
 
-val QueryFieldHeight = 45.5.dp
+val QueryFieldHeight = 55.5.dp
 val ActionItemHeight = 72.dp

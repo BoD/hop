@@ -33,10 +33,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.app.util.getMacOSAllApplications
 import org.jraf.hop.action.util.openApplication
 
 class AppActionProvider : ActionProvider {
@@ -45,17 +45,31 @@ class AppActionProvider : ActionProvider {
   override fun provide(query: String): Flow<List<Action>> {
     return flow {
       val matchingFiles = withContext(Dispatchers.IO) {
-        SystemFileSystem.list(Path("/Applications")) +
-          SystemFileSystem.list(Path("/System/Applications"))
+        getMacOSAllApplications()
       }.filter { path ->
         path.name.endsWith(".app") && path.name.contains(query, ignoreCase = true)
       }
-      emit(
-        matchingFiles.map { path ->
+      // Emit the list quickly, with possibly no icons
+      var iconCacheMiss = false
+      val actions = matchingFiles.map { path ->
+        val icon = if (!macOSAppIconCache.isCached(path)) {
+          iconCacheMiss = true
+          null
+        } else {
+          macOSAppIconCache.getIcon(path)
+        }
+        AppAction(path, icon)
+      }.sortedBy { it.primaryText }
+      emit(actions)
+
+      if (iconCacheMiss) {
+        // Emit again, with all the icons
+        val actionsWithIcons = matchingFiles.map { path ->
           val icon = macOSAppIconCache.getIcon(path)
           AppAction(path, icon)
-        }.sortedBy { it.primaryText },
-      )
+        }.sortedBy { it.primaryText }
+        emit(actionsWithIcons)
+      }
     }
   }
 }
