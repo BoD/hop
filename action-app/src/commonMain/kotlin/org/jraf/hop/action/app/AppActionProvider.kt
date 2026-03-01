@@ -27,28 +27,24 @@ package org.jraf.hop.action.app
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
-import org.jraf.hop.action.app.util.getMacOSAllApplications
 import org.jraf.hop.action.util.openApplication
 
 class AppActionProvider : ActionProvider {
   private val macOSAppIconCache = MacOSAppIconCache()
+  private val macOSAppListCache = MacOSAppListCache()
 
   override fun provide(query: String): Flow<List<Action>> {
     return flow {
-      val matchingFiles = withContext(Dispatchers.IO) {
-        getMacOSAllApplications()
-      }.filter { path ->
-        path.name.endsWith(".app") && path.name.contains(query, ignoreCase = true)
-      }
+      val matchingFiles = macOSAppListCache.getAllApps()
+        .filter { path ->
+          path.name.endsWith(".app") && path.name.contains(query, ignoreCase = true)
+        }
       // Emit the list quickly, with possibly no icons
       var iconCacheMiss = false
       val actions = matchingFiles.map { path ->

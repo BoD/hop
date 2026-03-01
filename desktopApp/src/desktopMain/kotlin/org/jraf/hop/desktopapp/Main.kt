@@ -46,6 +46,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.app.AppActionProvider
 import org.jraf.hop.action.bookmark.BookmarkActionProvider
+import org.jraf.hop.action.calculator.CalculatorActionProvider
 import org.jraf.hop.action.url.UrlActionProvider
 import org.jraf.hop.action.websearch.WebSearchActionProvider
 import org.jraf.hop.desktopapp.generated.resources.Res
@@ -74,6 +75,7 @@ fun main() {
   val engine = Engine(
     listOf(
       AppActionProvider(),
+      CalculatorActionProvider(),
       UrlActionProvider(
         UrlActionProvider.Configuration(
           icon = UrlActionProvider.Configuration.Icon.Bundled.Brave,

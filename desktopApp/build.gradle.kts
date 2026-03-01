@@ -34,6 +34,7 @@ kotlin {
         implementation(project(":action-bookmark"))
         implementation(project(":action-url"))
         implementation(project(":action-webSearch"))
+        implementation(project(":action-calculator"))
         implementation(project(":ui"))
       }
     }

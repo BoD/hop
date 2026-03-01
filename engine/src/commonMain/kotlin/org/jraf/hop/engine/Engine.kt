@@ -23,11 +23,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@file:OptIn(FlowPreview::class)
+
 package org.jraf.hop.engine
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +57,7 @@ class Engine(
 
   val actions: Flow<List<Action>> = combine(
     query
+//      .debounce(50.milliseconds)
       .map { query -> query.trimStart() }
       .distinctUntilChanged(),
     launchItemRepository.counters,

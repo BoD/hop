@@ -41,6 +41,7 @@ include(
   ":action-bookmark",
   ":action-url",
   ":action-webSearch",
+  ":action-calculator",
   ":engine",
   ":ui",
   ":desktopApp",
