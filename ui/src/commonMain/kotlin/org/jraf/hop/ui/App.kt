@@ -30,7 +30,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,8 +50,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -66,6 +63,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.Key
@@ -79,6 +77,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.materialkolor.DynamicMaterialTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jraf.hop.action.Action
 import org.jraf.hop.engine.Engine
@@ -91,7 +90,7 @@ fun App(
   focusRequester: FocusRequester,
   onDispose: () -> Unit,
 ) {
-  MaterialTheme(if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+  DynamicMaterialTheme(seedColor = systemAccentColor() ?: Color(red = 232, green = 136, blue = 58)) {
     val actionItemHeightPx = with(LocalDensity.current) { ActionItemHeight.toPx() }
     val viewModel = remember { AppViewModel(engine) }
     val state: AppViewModel.State by viewModel.state.collectAsState()

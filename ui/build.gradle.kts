@@ -19,8 +19,15 @@ kotlin {
         api(libs.compose.ui)
         implementation(libs.compose.components.resources)
         implementation(libs.compose.ui.toolingPreview)
-
+        implementation(libs.materialKolor)
         api(project(":engine"))
+      }
+    }
+
+    jvmMain {
+      dependencies {
+        implementation(libs.nucleus.coreRuntime)
+        implementation(libs.nucleus.systemColor)
       }
     }
   }
