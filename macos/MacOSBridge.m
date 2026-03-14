@@ -53,6 +53,16 @@ int getAppIconPixels(const char *path, int size, void **outData, int *outWidth, 
     return 1;
 }
 
+static void scanDir(NSString *dir, NSMutableSet *results) {
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSArray *contents = [fm contentsOfDirectoryAtPath:dir error:nil];
+    for (NSString *name in contents) {
+        if ([name hasSuffix:@".app"]) {
+            [results addObject:[dir stringByAppendingPathComponent:name]];
+        }
+    }
+}
+
 const char *getAllApplicationPaths() {
     __block NSString *result = nil;
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
@@ -69,21 +79,42 @@ const char *getAllApplicationPaths() {
                     [[NSNotificationCenter defaultCenter]
                             addObserverForName:NSMetadataQueryDidFinishGatheringNotification
                                         object:query queue:nil
-                                    usingBlock:^(NSNotification *note) {
-                                        [query stopQuery];
+                            usingBlock:^(NSNotification *note) {
+                                [query stopQuery];
 
-                                        NSMutableArray *paths = [NSMutableArray array];
-                                        for (NSMetadataItem *item in query.results) {
-                                            NSString *path = [item valueForAttribute:NSMetadataItemPathKey];
+                                NSMutableSet *paths = [NSMutableSet set];
+
+                                // Add Spotlight results
+                                for (NSMetadataItem *item in query.results) {
+                                    NSString *path = [item valueForAttribute:NSMetadataItemPathKey];
                                             if (path) [paths addObject:path];
                                         }
-                                        result = [[paths componentsJoinedByString:@"\n"] retain];
+
+                                // Overlay direct scans of known dirs
+                                NSArray *knownDirs = @[
+                                        @"/Applications",
+                                        @"/System/Applications",
+                                        @"/System/Applications/Utilities",
+                                        @"/System/Library/CoreServices/Applications",
+                                        [NSHomeDirectory() stringByAppendingPathComponent:@"Applications"],
+                                ];
+                                for (NSString *dir in knownDirs) {
+                                    NSArray *contents = [[NSFileManager defaultManager]
+                                            contentsOfDirectoryAtPath:dir error:nil];
+                                    for (NSString *name in contents) {
+                                        if ([name hasSuffix:@".app"]) {
+                                            [paths addObject:[dir stringByAppendingPathComponent:name]];
+                                        }
+                                    }
+                                }
+
+                                result = [[[paths allObjects] componentsJoinedByString:@"\n"] retain];
 
                                         CFRunLoopStop(CFRunLoopGetCurrent());
                                     }];
 
                     [query startQuery];
-                    CFRunLoopRun(); // runs until we CFRunLoopStop it above
+                    CFRunLoopRun();
 
                     [query release];
                     dispatch_semaphore_signal(sem);
