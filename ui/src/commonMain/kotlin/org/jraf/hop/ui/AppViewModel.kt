@@ -84,7 +84,11 @@ class AppViewModel(
     this.selectedAction.value = actions[if (currentIndex == -1) 0 else (currentIndex + direction).mod(actions.size)]
   }
 
-  fun executeAction() {
+  fun executeSelectedAction() {
     engine.executeAction(state.value.selectedAction!!)
+  }
+
+  fun executeAction(action: Action) {
+    engine.executeAction(action)
   }
 }

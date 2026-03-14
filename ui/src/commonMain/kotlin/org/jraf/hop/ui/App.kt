@@ -29,6 +29,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -105,7 +106,7 @@ fun App(
         onKeyboardUp = viewModel::selectPreviousAction,
         onKeyboardEscape = { onDispose() },
         onKeyboardEnter = {
-          viewModel.executeAction()
+          viewModel.executeSelectedAction()
           onDispose()
         },
         focusRequester = focusRequester,
@@ -129,7 +130,14 @@ fun App(
                 bringIntoViewRequester.bringIntoView(Rect(Offset(0F, -actionItemHeightPx), Size(0F, actionItemHeightPx * 3)))
               }
             }
-            ActionItem(action = action, selected = isSelected)
+            ActionItem(
+              action = action,
+              selected = isSelected,
+              onActionClick = {
+                viewModel.executeAction(it)
+                onDispose()
+              },
+            )
           }
         }
       }
@@ -241,7 +249,11 @@ private fun QueryField(
 }
 
 @Composable
-private fun ActionItem(action: Action, selected: Boolean) {
+private fun ActionItem(
+  action: Action,
+  selected: Boolean,
+  onActionClick: (Action) -> Unit,
+) {
   val colors = if (selected) {
     ListItemDefaults.colors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
   } else {
@@ -249,6 +261,7 @@ private fun ActionItem(action: Action, selected: Boolean) {
   }
   ListItem(
     modifier = Modifier
+      .clickable(onClick = { onActionClick(action) })
       .heightIn(min = ActionItemHeight)
       .fillMaxWidth(),
     headlineContent = {
