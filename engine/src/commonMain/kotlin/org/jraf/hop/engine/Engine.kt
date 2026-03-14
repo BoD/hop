@@ -32,9 +32,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -45,6 +47,8 @@ import kotlinx.coroutines.launch
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.engine.db.LaunchItemRepository
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class Engine(
@@ -68,7 +72,7 @@ class Engine(
       if (query.isBlank()) {
         flowOf(emptyList())
       } else {
-        combine(actionProviders.map { it.provide(query) }) { actionsList ->
+        combine(actionProviders.map { it.provide(query).defaultAfterTimeout(300.milliseconds, emptyList()) }) { actionsList ->
           actionsList
             .flatMap { it.map { action -> TrackingAction(action) } }
             .sortedByDescending { counters[it.id]?.combined ?: 0 }
@@ -87,6 +91,26 @@ class Engine(
     override suspend fun execute() {
       launchItemRepository.recordLaunchedItem(id)
       action.execute()
+    }
+  }
+}
+
+/**
+ * If nothing has been emitted by this Flow after [timeout], start by emitting [defaultValue], and then emit the actual values when they become available.
+ */
+private fun <T> Flow<T>.defaultAfterTimeout(timeout: Duration, defaultValue: T): Flow<T> {
+  return channelFlow {
+    var emitted = false
+    val timeoutJob = launch {
+      delay(timeout)
+      if (!emitted) {
+        send(defaultValue)
+      }
+    }
+    collect { value ->
+      emitted = true
+      timeoutJob.cancel()
+      send(value)
     }
   }
 }
