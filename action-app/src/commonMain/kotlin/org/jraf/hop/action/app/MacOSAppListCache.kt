@@ -29,7 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
-import org.jraf.hop.action.app.util.getMacOSAllApplications
+import org.jraf.hop.macosbridge.getMacOSAllApplications
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant

@@ -5,7 +5,7 @@ plugins {
 }
 
 // Generate a Version.kt file with a constant for the version name
-val generateVersionKtTask: TaskProvider<Task> = tasks.register("generateVersionKt") {
+val generateVersionKt: TaskProvider<Task> by tasks.registering {
   val outputDir = layout.buildDirectory.dir("generated/source/kotlin").get().asFile
   outputs.dir(outputDir)
   val version = rootProject.version
@@ -26,7 +26,7 @@ kotlin {
 
   sourceSets {
     commonMain {
-      kotlin.srcDir(generateVersionKtTask)
+      kotlin.srcDir(generateVersionKt)
 
       dependencies {
         api(libs.kotlinx.coroutines.core)

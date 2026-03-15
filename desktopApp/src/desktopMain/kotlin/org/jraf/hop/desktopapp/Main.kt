@@ -54,6 +54,7 @@ import org.jraf.hop.desktopapp.generated.resources.app_name
 import org.jraf.hop.desktopapp.util.getScreenSize
 import org.jraf.hop.desktopapp.util.getWindowPosition
 import org.jraf.hop.engine.Engine
+import org.jraf.hop.macosbridge.focusPreviousApplication
 import org.jraf.hop.ui.ActionItemHeight
 import org.jraf.hop.ui.App
 import org.jraf.hop.ui.QueryFieldHeight
@@ -150,8 +151,12 @@ fun main() {
         App(
           engine = engine,
           focusRequester = focusRequester,
+          onActionExecute = {
+            isVisible = false
+          },
           onDispose = {
             isVisible = false
+            focusPreviousApplication()
           },
         )
 

@@ -30,7 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.io.files.Path
-import org.jraf.hop.action.app.util.getMacOSAppIcon
+import org.jraf.hop.macosbridge.getMacOSAppIcon
 
 internal class MacOSAppIconCache {
   private val cache = mutableMapOf<Path, ImageBitmap?>()

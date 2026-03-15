@@ -1,9 +1,9 @@
 // This source is part of the
 //      _____  ___   ____
 //  __ / / _ \/ _ | / __/___  _______ _
-// / // / , _/ __ |/ _/_/ _ \/ __/ _ `
-// \___/_/|_/_/ |_/_/ (_)___/_/  \_,
-//                              /___
+// / // / , _/ __ |/ _/_/ _ \/ __/ _ `/
+// \___/_/|_/_/ |_/_/ (_)___/_/  \_, /
+//                              /___/
 // repository.
 //
 // Copyright (C) 2026-present Benoit 'BoD' Lubek (BoD@JRAF.org)
@@ -136,4 +136,17 @@ const char *getAllApplicationPaths() {
 
 void freeBuffer(void *buffer) {
     free(buffer);
+}
+
+void focusPreviousApp() {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @autoreleasepool {
+            NSRunningApplication *prev = [[NSWorkspace sharedWorkspace] menuBarOwningApplication];
+            // No clean public API exists post-macOS 14 for this; pragma is intentional
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            [prev activateWithOptions:NSApplicationActivateIgnoringOtherApps];
+#pragma clang diagnostic pop
+        }
+    });
 }

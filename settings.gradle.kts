@@ -35,6 +35,7 @@ plugins {
 }
 
 include(
+  ":macOSBridge",
   ":action-api",
   ":action-util",
   ":action-app",

@@ -88,6 +88,7 @@ import org.jraf.hop.ui.generated.resources.hop
 fun App(
   engine: Engine,
   focusRequester: FocusRequester,
+  onActionExecute: () -> Unit,
   onDispose: () -> Unit,
 ) {
   DynamicMaterialTheme(seedColor = systemAccentColor() ?: Color(red = 232, green = 136, blue = 58)) {
@@ -106,7 +107,7 @@ fun App(
         onKeyboardEscape = { onDispose() },
         onKeyboardEnter = {
           viewModel.executeSelectedAction()
-          onDispose()
+          onActionExecute()
         },
         focusRequester = focusRequester,
       )
@@ -134,7 +135,7 @@ fun App(
               selected = isSelected,
               onActionClick = {
                 viewModel.executeAction(it)
-                onDispose()
+                onActionExecute()
               },
             )
           }

@@ -23,15 +23,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jraf.hop.action.app.util
+package org.jraf.hop.macosbridge
 
 import androidx.compose.ui.graphics.ImageBitmap
 import kotlinx.io.files.Path
 
-internal actual fun getMacOSAppIcon(applicationPath: Path): ImageBitmap? {
-  TODO("Not yet implemented")
-}
+expect fun getMacOSAppIcon(applicationPath: Path): ImageBitmap?
 
-internal actual fun getMacOSAllApplications(): Set<Path> {
-  TODO("Not yet implemented")
-}
+expect fun getMacOSAllApplications(): Set<Path>
+
+expect fun focusPreviousApplication()

@@ -30,6 +30,7 @@ kotlin {
         implementation(libs.jkeymaster)
         implementation(libs.jna)
 
+        implementation(project(":macOSBridge"))
         implementation(project(":action-app"))
         implementation(project(":action-bookmark"))
         implementation(project(":action-url"))

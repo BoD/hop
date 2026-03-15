@@ -14,6 +14,7 @@ kotlin {
         implementation(project(":action-util"))
         implementation(libs.klibnanolog)
         implementation(libs.kotlinx.io.core)
+        implementation(project(":macOSBridge"))
       }
     }
 

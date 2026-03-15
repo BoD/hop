@@ -23,7 +23,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.jraf.hop.action.app.util
+package org.jraf.hop.macosbridge
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
@@ -48,6 +48,8 @@ private interface MacOSBridge : Library {
   fun getAllApplicationPaths(): Pointer
 
   fun freeBuffer(buffer: Pointer)
+
+  fun focusPreviousApp()
 
   companion object {
     val INSTANCE: MacOSBridge = Native.load(
@@ -101,4 +103,8 @@ internal fun getAllApplicationPaths(): List<String> {
   val result = pointer.getString(0)
   bridge.freeBuffer(pointer)
   return result.split("\n").filter { it.isNotEmpty() }
+}
+
+internal fun internalFocusPreviousApp() {
+  MacOSBridge.INSTANCE.focusPreviousApp()
 }
