@@ -27,7 +27,6 @@ package org.jraf.hop.action.util
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.decodeToImageBitmap
-import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readRawBytes
@@ -38,10 +37,6 @@ val iconCache: IconCache by lazy { IconCache() }
 
 class IconCache {
   private val cache = mutableMapOf<String, ImageBitmap?>()
-
-  private val httpClient by lazy {
-    HttpClient()
-  }
 
   fun isCached(url: String) = cache.containsKey(url)
 

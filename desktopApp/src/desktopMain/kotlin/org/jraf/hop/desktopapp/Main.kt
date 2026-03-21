@@ -49,6 +49,7 @@ import org.jraf.hop.action.bookmark.BookmarkActionProvider
 import org.jraf.hop.action.calculator.CalculatorActionProvider
 import org.jraf.hop.action.url.UrlActionProvider
 import org.jraf.hop.action.websearch.WebSearchActionProvider
+import org.jraf.hop.action.wikipedia.WikipediaActionProvider
 import org.jraf.hop.desktopapp.generated.resources.Res
 import org.jraf.hop.desktopapp.generated.resources.app_name
 import org.jraf.hop.desktopapp.util.getScreenSize
@@ -106,6 +107,13 @@ fun main() {
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://avatars.githubusercontent.com/u/17189275?s=48&v=4"),
         ),
       ),
+      WikipediaActionProvider(
+        WikipediaActionProvider.Configuration(
+          shortcut = "wiki",
+        ),
+      ),
+
+      // Fallback, keep as last item
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "Google",

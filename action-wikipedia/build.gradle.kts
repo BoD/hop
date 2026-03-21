@@ -15,10 +15,11 @@ kotlin {
       dependencies {
         api(project(":action-api"))
         implementation(project(":action-util"))
-        implementation(libs.compose.components.resources)
-        implementation(libs.klibnanolog)
         implementation(libs.kotlinx.serialization.json)
-        implementation(libs.kotlinx.io.core)
+        implementation(libs.ktor.client.contentNegotiation)
+        implementation(libs.ktor.client.logging)
+        implementation(libs.ktor.serialization.kotlinx.json)
+        implementation(libs.klibnanolog)
       }
     }
   }

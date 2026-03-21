@@ -56,7 +56,7 @@ sqldelight {
 
 tapmoc {
   java(17)
-  kotlin("2.3.10")
+  kotlin("2.3.20")
   checkDependencies()
 }
 

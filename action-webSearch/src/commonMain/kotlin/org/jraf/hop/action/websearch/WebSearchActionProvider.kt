@@ -47,18 +47,22 @@ class WebSearchActionProvider(
     return if (configuration.shortcut != null) {
       if (query.startsWith(configuration.shortcut + " ", ignoreCase = true)) {
         val query = query.removePrefix(configuration.shortcut + " ").trim()
-        if (configuration.icon is Icon.Url) {
-          flow {
-            if (!iconCache.isCached(configuration.icon.url)) {
-              // Quickly emit the results without the icon
-              emit(listOf(WebSearchAction(configuration, query)))
-            }
-
-            // (Re-)emit the result with the cached icon
-            emit(listOf(WebSearchAction(configuration, query, iconBitmap = iconCache.get(configuration.icon.url))))
-          }
+        if (query.isBlank()) {
+          flowOf(emptyList())
         } else {
-          flowOf(listOf(WebSearchAction(configuration, query)))
+          if (configuration.icon is Icon.Url) {
+            flow {
+              if (!iconCache.isCached(configuration.icon.url)) {
+                // Quickly emit the results without the icon
+                emit(listOf(WebSearchAction(configuration, query)))
+              }
+
+              // (Re-)emit the result with the cached icon
+              emit(listOf(WebSearchAction(configuration, query, iconBitmap = iconCache.get(configuration.icon.url))))
+            }
+          } else {
+            flowOf(listOf(WebSearchAction(configuration, query)))
+          }
         }
       } else {
         flowOf(emptyList())

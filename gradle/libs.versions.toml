@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 compose-multiplatform = "1.10.1"
 compose-hotReload = "1.0.0"
 compose-material3 = "1.9.0"
@@ -39,6 +39,9 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 klibnanolog = { module = "org.jraf.klibnanolog:klibnanolog", version.ref = "klibnanolog" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-client-contentNegotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 jkeymaster = { group = "com.github.tulskiy", name = "jkeymaster", version.ref = "jkeymaster" }
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
 sqldelight-sqlite = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }

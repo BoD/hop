@@ -12,9 +12,9 @@ kotlin {
       dependencies {
         api(libs.kotlinx.io.core)
         api(libs.compose.ui)
-        implementation(libs.klibnanolog)
-        implementation(libs.ktor.client.core)
+        api(libs.ktor.client.core)
         implementation(libs.ktor.client.cio)
+        implementation(libs.klibnanolog)
       }
     }
   }
@@ -22,6 +22,6 @@ kotlin {
 
 tapmoc {
   java(17)
-  kotlin("2.3.10")
+  kotlin("2.3.20")
   checkDependencies()
 }

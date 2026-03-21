@@ -43,6 +43,7 @@ include(
   ":action-url",
   ":action-webSearch",
   ":action-calculator",
+  ":action-wikipedia",
   ":engine",
   ":ui",
   ":desktopApp",

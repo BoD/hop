@@ -36,6 +36,7 @@ kotlin {
         implementation(project(":action-url"))
         implementation(project(":action-webSearch"))
         implementation(project(":action-calculator"))
+        implementation(project(":action-wikipedia"))
         implementation(project(":ui"))
       }
     }
@@ -69,6 +70,6 @@ compose.resources {
 
 tapmoc {
   java(17)
-  kotlin("2.3.10")
+  kotlin("2.3.20")
   checkDependencies()
 }
