@@ -25,15 +25,11 @@
 
 package org.jraf.hop.action.websearch
 
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
-import org.jraf.hop.action.util.iconCache
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action.util.urlEncoded
 import org.jraf.hop.action.websearch.WebSearchActionProvider.Configuration.Icon
@@ -50,19 +46,7 @@ class WebSearchActionProvider(
         if (query.isBlank()) {
           flowOf(emptyList())
         } else {
-          if (configuration.icon is Icon.Url) {
-            flow {
-              if (!iconCache.isCached(configuration.icon.url)) {
-                // Quickly emit the results without the icon
-                emit(listOf(WebSearchAction(configuration, query)))
-              }
-
-              // (Re-)emit the result with the cached icon
-              emit(listOf(WebSearchAction(configuration, query, iconBitmap = iconCache.get(configuration.icon.url))))
-            }
-          } else {
-            flowOf(listOf(WebSearchAction(configuration, query)))
-          }
+          flowOf(listOf(WebSearchAction(configuration, query)))
         }
       } else {
         flowOf(emptyList())
@@ -96,14 +80,13 @@ class WebSearchActionProvider(
 private data class WebSearchAction(
   private val configuration: WebSearchActionProvider.Configuration,
   private val query: String,
-  private val iconBitmap: ImageBitmap? = null,
 ) : BaseAction() {
   override val id: String = "${this::class.qualifiedName!!}:${configuration.name}:$query"
   override val primaryText: String = configuration.primaryTextPattern.replace("{}", query)
   override val secondaryText: String = configuration.name
   override val icon = when (configuration.icon) {
     Icon.Bundled.Google -> Action.Icon.ResourceIcon(Res.drawable.google)
-    is Icon.Url -> iconBitmap?.let { Action.Icon.PainterIcon(BitmapPainter(it)) }
+    is Icon.Url -> Action.Icon.UriIcon(configuration.icon.url)
   }
 
   override suspend fun execute() {

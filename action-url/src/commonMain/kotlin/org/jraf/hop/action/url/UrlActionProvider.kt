@@ -25,15 +25,12 @@
 
 package org.jraf.hop.action.url
 
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
-import org.jraf.hop.action.util.iconCache
+import org.jraf.hop.action.url.UrlActionProvider.Configuration.Icon
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action_url.generated.resources.Res
 import org.jraf.hop.action_url.generated.resources.brave
@@ -46,18 +43,7 @@ class UrlActionProvider(
     return if (!query.isProbableUrl()) {
       flowOf(listOf())
     } else {
-      flow {
-        if (configuration.icon is Configuration.Icon.Url) {
-          if (!iconCache.isCached(configuration.icon.url)) {
-            // Quickly emit the results without the icon
-            emit(listOf(UrlAction(configuration, query)))
-          }
-          // (Re-)emit the result with the cached icon
-          emit(listOf(UrlAction(configuration, query, iconBitmap = iconCache.get(configuration.icon.url))))
-        } else {
-          emit(listOf(UrlAction(configuration, query)))
-        }
-      }
+      flowOf(listOf(UrlAction(configuration, query)))
     }
   }
 
@@ -81,14 +67,13 @@ class UrlActionProvider(
 private data class UrlAction(
   private val configuration: UrlActionProvider.Configuration,
   private val url: String,
-  private val iconBitmap: ImageBitmap? = null,
 ) : BaseAction() {
   override val id: String = "${this::class.qualifiedName!!}:$url"
   override val primaryText: String = url
   override val secondaryText: String = "Open in browser"
   override val icon = when (configuration.icon) {
-    UrlActionProvider.Configuration.Icon.Bundled.Brave -> Action.Icon.ResourceIcon(Res.drawable.brave)
-    is UrlActionProvider.Configuration.Icon.Url -> iconBitmap?.let { Action.Icon.PainterIcon(BitmapPainter(it)) }
+    Icon.Bundled.Brave -> Action.Icon.ResourceIcon(Res.drawable.brave)
+    is Icon.Url -> Action.Icon.UriIcon(configuration.icon.url)
   }
 
   override suspend fun execute() {

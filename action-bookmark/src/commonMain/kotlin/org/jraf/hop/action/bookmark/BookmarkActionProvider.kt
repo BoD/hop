@@ -25,16 +25,14 @@
 
 package org.jraf.hop.action.bookmark
 
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.files.Path
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.bookmark.BookmarkActionProvider.Configuration.Icon
 import org.jraf.hop.action.bookmark.util.lastModified
-import org.jraf.hop.action.util.iconCache
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action.util.suspendRunCatching
 import org.jraf.hop.action_bookmark.generated.resources.Res
@@ -62,16 +60,7 @@ class BookmarkActionProvider(
       if (bookmarks.isEmpty()) {
         emit(emptyList())
       } else {
-        if (configuration.icon is Configuration.Icon.Url) {
-          if (!iconCache.isCached(configuration.icon.url)) {
-            // Quickly emit the results without the icon
-            emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
-          }
-          // (Re-)emit the result with the cached icon
-          emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode, iconBitmap = iconCache.get(configuration.icon.url)) })
-        } else {
-          emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
-        }
+        emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
       }
     }
   }
@@ -122,14 +111,13 @@ class BookmarkActionProvider(
 private data class BookmarkAction(
   private val configuration: BookmarkActionProvider.Configuration,
   private val urlNode: UrlNode,
-  private val iconBitmap: ImageBitmap? = null,
 ) : BaseAction() {
   override val id: String = "${this::class.qualifiedName!!}:$urlNode"
   override val primaryText: String = urlNode.name
   override val secondaryText: String = urlNode.url
   override val icon = when (configuration.icon) {
-    BookmarkActionProvider.Configuration.Icon.Bundled.Brave -> Action.Icon.ResourceIcon(Res.drawable.brave)
-    is BookmarkActionProvider.Configuration.Icon.Url -> iconBitmap?.let { Action.Icon.PainterIcon(BitmapPainter(it)) }
+    Icon.Bundled.Brave -> Action.Icon.ResourceIcon(Res.drawable.brave)
+    is Icon.Url -> Action.Icon.UriIcon(configuration.icon.url)
   }
 
   override suspend fun execute() {

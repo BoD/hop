@@ -20,6 +20,8 @@ kotlin {
         implementation(libs.compose.components.resources)
         implementation(libs.compose.ui.toolingPreview)
         implementation(libs.materialKolor)
+        implementation(libs.coil.compose)
+        implementation(libs.coil.ktor3)
         api(project(":engine"))
       }
     }

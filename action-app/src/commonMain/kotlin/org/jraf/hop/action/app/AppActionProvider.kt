@@ -26,7 +26,6 @@
 package org.jraf.hop.action.app
 
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.io.files.Path
@@ -83,7 +82,7 @@ private data class AppAction(
     val appName = applicationPath.name.removeSuffix(".app")
     primaryText = appName
     secondaryText = applicationPath.toString()
-    icon = iconBitmap?.let { Action.Icon.PainterIcon(BitmapPainter(it)) }
+    icon = iconBitmap?.let { Action.Icon.ImageBitmapIcon(it) }
   }
 
   override suspend fun execute() {

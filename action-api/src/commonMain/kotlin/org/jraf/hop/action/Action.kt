@@ -25,7 +25,7 @@
 
 package org.jraf.hop.action
 
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.ImageBitmap
 import org.jetbrains.compose.resources.DrawableResource
 
 interface Action {
@@ -41,8 +41,9 @@ interface Action {
   suspend fun execute()
 
   sealed interface Icon {
-    class PainterIcon(val painter: Painter) : Icon
+    class ImageBitmapIcon(val imageBitmap: ImageBitmap) : Icon
     class ResourceIcon(val resource: DrawableResource) : Icon
+    class UriIcon(val uri: String) : Icon
   }
 }
 

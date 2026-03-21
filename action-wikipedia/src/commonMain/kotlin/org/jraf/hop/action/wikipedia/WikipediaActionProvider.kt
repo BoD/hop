@@ -25,15 +25,12 @@
 
 package org.jraf.hop.action.wikipedia
 
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
-import org.jraf.hop.action.util.iconCache
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action.wikipedia.api.WikipediaApiClient
 
@@ -57,14 +54,7 @@ class WikipediaActionProvider(
           index = index,
         )
       }
-
-      if (!iconCache.isCached(ICON_URL)) {
-        // Quickly emit the results without the icon
-        emit(actions)
-      }
-
-      // (Re-)emit the result with the cached icon
-      emit(actions.map { it.copy(iconBitmap = iconCache.get(ICON_URL)) })
+      emit(actions)
     }
   }
 
@@ -77,13 +67,12 @@ private data class WikipediaAction(
   private val query: String,
   private val articleTitle: String,
   private val articleUrl: String,
-  private val iconBitmap: ImageBitmap? = null,
   private val index: Int,
 ) : BaseAction() {
   override val id: String = "${this::class.qualifiedName!!}:$query:$index"
   override val primaryText: String = articleTitle
   override val secondaryText: String = articleUrl
-  override val icon = iconBitmap?.let { Action.Icon.PainterIcon(BitmapPainter(it)) }
+  override val icon = Action.Icon.UriIcon(ICON_URL)
 
   override suspend fun execute() {
     openUrl(articleUrl)

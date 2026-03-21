@@ -64,7 +64,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -77,9 +80,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.materialkolor.DynamicMaterialTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jraf.hop.action.Action
+import org.jraf.hop.action.Action.Icon.ImageBitmapIcon
+import org.jraf.hop.action.Action.Icon.ResourceIcon
+import org.jraf.hop.action.Action.Icon.UriIcon
 import org.jraf.hop.engine.Engine
 import org.jraf.hop.ui.generated.resources.Res
 import org.jraf.hop.ui.generated.resources.hop
@@ -91,6 +98,13 @@ fun App(
   onActionExecute: () -> Unit,
   onDispose: () -> Unit,
 ) {
+  // Configure Coil logging
+//  setSingletonImageLoaderFactory { context ->
+//    ImageLoader.Builder(context)
+//      .logger(DebugLogger())
+//      .build()
+//  }
+
   DynamicMaterialTheme(seedColor = systemAccentColor() ?: Color(red = 232, green = 136, blue = 58)) {
     val actionItemHeightPx = with(LocalDensity.current) { ActionItemHeight.toPx() }
     val viewModel = remember { AppViewModel(engine) }
@@ -288,16 +302,47 @@ private fun ActionItem(
           tint = LocalContentColor.current.copy(alpha = 0.38f),
         )
       } else {
-        Image(
-          modifier = Modifier.size(40.dp),
-          painter = when (icon) {
-            is Action.Icon.PainterIcon -> icon.painter
-            is Action.Icon.ResourceIcon -> painterResource(icon.resource)
-          },
-          contentDescription = null,
-        )
+        when (icon) {
+          is ImageBitmapIcon -> {
+            Image(
+              modifier = Modifier.size(40.dp),
+              bitmap = icon.imageBitmap,
+              contentDescription = null,
+            )
+          }
+
+          is ResourceIcon -> {
+            Image(
+              modifier = Modifier.size(40.dp),
+              painter = painterResource(icon.resource),
+              contentDescription = null,
+            )
+          }
+
+          is UriIcon -> {
+            AsyncImage(
+              modifier = Modifier.size(40.dp),
+              model = icon.uri,
+              placeholder = ColorFilterPainter(
+                painterResource(Res.drawable.hop),
+                ColorFilter.tint(LocalContentColor.current.copy(alpha = 0.38f)),
+              ),
+              contentDescription = null,
+            )
+          }
+        }
       }
     },
     colors = colors,
   )
+}
+
+private class ColorFilterPainter(private val wrapped: Painter, private val colorFilter: ColorFilter) : Painter() {
+  override val intrinsicSize get() = wrapped.intrinsicSize
+
+  override fun DrawScope.onDraw() {
+    with(wrapped) {
+      draw(intrinsicSize, colorFilter = colorFilter)
+    }
+  }
 }

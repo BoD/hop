@@ -15,6 +15,7 @@ sqldelight = "2.2.1"
 keval = "1.1.1"
 nucleus = "1.4.7"
 materialKolor = "4.1.1"
+coil = "3.4.0"
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -51,3 +52,5 @@ keval = { group = "com.notkamui.libs", name = "keval", version.ref = "keval" }
 nucleus-coreRuntime = { group = "io.github.kdroidfilter", name = "nucleus.core-runtime", version.ref = "nucleus" }
 nucleus-systemColor = { group = "io.github.kdroidfilter", name = "nucleus.system-color", version.ref = "nucleus" }
 materialKolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
