@@ -25,24 +25,24 @@
 
 package org.jraf.hop.action.calculator
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.action.ActionProvider.Result
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.action
 import org.jraf.hop.action_calculator.generated.resources.Res
 import org.jraf.hop.action_calculator.generated.resources.calculator
 
 class CalculatorActionProvider : ActionProvider {
-  override fun provide(query: String): Flow<List<Action>> {
+  override fun provide(query: String): Result {
     if (!query.isMathExpression()) {
-      return flowOf(listOf())
+      return Result.Empty
     }
     val result = runCatching { eval(query.stripSpaces()) }.getOrNull()
     return if (result == null) {
-      flowOf(listOf())
+      Result.Empty
     } else {
-      flowOf(listOf(CalculatorAction(expression = query, result = result.toFormattedString())))
+      action(CalculatorAction(expression = query, result = result.toFormattedString()))
     }
   }
 

@@ -25,11 +25,11 @@
 
 package org.jraf.hop.action.websearch
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.action.ActionProvider.Result
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.action
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action.util.urlEncoded
 import org.jraf.hop.action.websearch.WebSearchActionProvider.Configuration.Icon
@@ -39,23 +39,23 @@ import org.jraf.hop.action_websearch.generated.resources.google
 class WebSearchActionProvider(
   private val configuration: Configuration,
 ) : ActionProvider {
-  override fun provide(query: String): Flow<List<Action>> {
+  override fun provide(query: String): Result {
     return if (configuration.shortcut != null) {
       if (query.startsWith(configuration.shortcut + " ", ignoreCase = true)) {
         val query = query.removePrefix(configuration.shortcut + " ").trim()
         if (query.isBlank()) {
-          flowOf(emptyList())
+          Result.Empty
         } else {
-          flowOf(listOf(WebSearchAction(configuration, query)))
+          action(WebSearchAction(configuration, query))
         }
       } else {
-        flowOf(emptyList())
+        Result.Empty
       }
     } else {
       if (query.isBlank()) {
-        flowOf(emptyList())
+        Result.Empty
       } else {
-        flowOf(listOf(WebSearchAction(configuration, query)))
+        action(WebSearchAction(configuration, query))
       }
     }
   }

@@ -72,7 +72,7 @@ class Engine(
       if (query.isBlank()) {
         flowOf(emptyList())
       } else {
-        combine(actionProviders.map { it.provide(query).defaultAfterTimeout(300.milliseconds, emptyList()) }) { actionsList ->
+        combine(actionProviders.map { it.provide(query).actions.defaultAfterTimeout(300.milliseconds, emptyList()) }) { actionsList ->
           actionsList
             .flatMap { it.map { action -> TrackingAction(action) } }
             .sortedByDescending { counters[it.id]?.combined ?: 0 }

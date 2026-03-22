@@ -26,7 +26,33 @@
 package org.jraf.hop.action
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import org.jraf.hop.action.ActionProvider.Result
 
 interface ActionProvider {
-  fun provide(query: String): Flow<List<Action>>
+  fun provide(query: String): Result
+
+  sealed interface Result {
+    val actions: Flow<List<Action>>
+
+    data object Empty : Result {
+      override val actions: Flow<List<Action>> = flowOf(emptyList())
+    }
+
+    data class Actions(override val actions: Flow<List<Action>>) : Result
+  }
+}
+
+fun actions(block: suspend FlowCollector<List<Action>>.() -> Unit): Result.Actions {
+  return Result.Actions(flow(block))
+}
+
+fun actions(actions: List<Action>): Result.Actions {
+  return Result.Actions(flowOf(actions))
+}
+
+fun action(action: Action): Result.Actions {
+  return actions(listOf(action))
 }

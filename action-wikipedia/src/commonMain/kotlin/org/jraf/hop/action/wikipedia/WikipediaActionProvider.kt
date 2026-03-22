@@ -25,12 +25,10 @@
 
 package org.jraf.hop.action.wikipedia
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.actions
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action.wikipedia.api.WikipediaApiClient
 
@@ -41,11 +39,11 @@ class WikipediaActionProvider(
 ) : ActionProvider {
   private val wikipediaApiClient = WikipediaApiClient()
 
-  override fun provide(query: String): Flow<List<Action>> {
-    if (!query.startsWith(configuration.shortcut + " ", ignoreCase = true)) return emptyFlow()
+  override fun provide(query: String): ActionProvider.Result {
+    if (!query.startsWith(configuration.shortcut + " ", ignoreCase = true)) return ActionProvider.Result.Empty
     val query = query.removePrefix(configuration.shortcut + " ").trim()
-    if (query.isBlank()) return emptyFlow()
-    return flow {
+    if (query.isBlank()) return ActionProvider.Result.Empty
+    return actions {
       val actions = wikipediaApiClient.search(query).mapIndexed { index, searchResult ->
         WikipediaAction(
           query = query,

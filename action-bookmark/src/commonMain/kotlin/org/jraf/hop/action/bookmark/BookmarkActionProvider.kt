@@ -25,12 +25,12 @@
 
 package org.jraf.hop.action.bookmark
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.io.files.Path
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.action.ActionProvider.Result
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.actions
 import org.jraf.hop.action.bookmark.BookmarkActionProvider.Configuration.Icon
 import org.jraf.hop.action.bookmark.util.lastModified
 import org.jraf.hop.action.util.openUrl
@@ -51,17 +51,16 @@ class BookmarkActionProvider(
 
   private var cachedBookmarks: CachedBookmarks? = null
 
-  override fun provide(query: String): Flow<List<Action>> {
-    return flow {
+  override fun provide(query: String): Result {
+    return actions {
       ensureBookmarksLoaded()
-      val cachedBookmarks = cachedBookmarks ?: return@flow
+      val cachedBookmarks = cachedBookmarks ?: run {
+        emit(emptyList())
+        return@actions
+      }
       val bookmarks = cachedBookmarks.bookmarks
         .filter { it.name.contains(query, ignoreCase = true) || it.url.contains(query, ignoreCase = true) }
-      if (bookmarks.isEmpty()) {
-        emit(emptyList())
-      } else {
-        emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
-      }
+      emit(bookmarks.map { urlNode -> BookmarkAction(configuration, urlNode) })
     }
   }
 

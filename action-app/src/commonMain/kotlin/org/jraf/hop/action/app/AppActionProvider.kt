@@ -26,20 +26,20 @@
 package org.jraf.hop.action.app
 
 import androidx.compose.ui.graphics.ImageBitmap
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.io.files.Path
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.action.ActionProvider.Result
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.actions
 import org.jraf.hop.action.util.openApplication
 
 class AppActionProvider : ActionProvider {
   private val macOSAppIconCache = MacOSAppIconCache()
   private val macOSAppListCache = MacOSAppListCache()
 
-  override fun provide(query: String): Flow<List<Action>> {
-    return flow {
+  override fun provide(query: String): Result {
+    return actions {
       val matchingFiles = macOSAppListCache.getAllApps()
         .filter { path ->
           path.name.endsWith(".app") && path.name.contains(query, ignoreCase = true)

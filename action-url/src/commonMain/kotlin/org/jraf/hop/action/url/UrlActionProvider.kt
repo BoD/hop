@@ -25,11 +25,11 @@
 
 package org.jraf.hop.action.url
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.action.ActionProvider.Result
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.action
 import org.jraf.hop.action.url.UrlActionProvider.Configuration.Icon
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action_url.generated.resources.Res
@@ -39,11 +39,11 @@ class UrlActionProvider(
   private val configuration: Configuration,
 ) : ActionProvider {
 
-  override fun provide(query: String): Flow<List<Action>> {
+  override fun provide(query: String): Result {
     return if (!query.isProbableUrl()) {
-      flowOf(listOf())
+      Result.Empty
     } else {
-      flowOf(listOf(UrlAction(configuration, query)))
+      action(UrlAction(configuration, query))
     }
   }
 
