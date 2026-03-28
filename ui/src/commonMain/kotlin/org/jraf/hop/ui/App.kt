@@ -234,7 +234,7 @@ private fun QueryField(
                 true
               }
 
-              Key.Enter -> {
+              Key.Enter, Key.NumPadEnter -> {
                 if (it.type == KeyEventType.KeyDown) {
                   onKeyboardEnter()
                 }

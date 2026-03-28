@@ -147,9 +147,10 @@ fun main() {
         },
       ) {
         // Adjust the size of the window based on the number of actions
-        val actions: List<Action> by engine.actions.collectAsState(emptyList())
-        LaunchedEffect(actions) {
-          val heightBasedOnActions = QueryFieldHeight + actions.size * ActionItemHeight
+        val actions: List<Action> by engine.actions.collectAsState()
+        val actionsSize = actions.size
+        LaunchedEffect(actionsSize) {
+          val heightBasedOnActions = QueryFieldHeight + actionsSize * ActionItemHeight
           val maxHeight = screenSize.height - window.location.y.dp
           val height = heightBasedOnActions.coerceAtMost(maxHeight)
           windowState.size = DpSize(window.preferredSize.width.dp, height)
@@ -187,14 +188,16 @@ fun main() {
           }
         }
 
-        LaunchedEffect(isVisible) {
-          if (isVisible) {
-            Desktop.getDesktop().requestForeground(true)
-          } else {
-            // Reset query when hiding the window
-            engine.query.value = ""
-          }
+        LaunchedEffect(Unit) {
+          Desktop.getDesktop().requestForeground(true)
         }
+      }
+    }
+
+    LaunchedEffect(isVisible) {
+      if (!isVisible) {
+        // Reset query when hiding the window
+        engine.query.value = ""
       }
     }
 

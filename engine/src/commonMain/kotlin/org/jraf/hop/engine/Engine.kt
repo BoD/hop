@@ -36,13 +36,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
@@ -59,7 +60,7 @@ class Engine(
 
   val query: MutableStateFlow<String> = MutableStateFlow("")
 
-  val actions: Flow<List<Action>> = combine(
+  val actions: StateFlow<List<Action>> = combine(
     query
 //      .debounce(50.milliseconds)
       .map { query -> query.trimStart() }
@@ -79,7 +80,7 @@ class Engine(
         }
       }
     }
-    .shareIn(coroutineScope, SharingStarted.Lazily)
+    .stateIn(coroutineScope, SharingStarted.Lazily, emptyList())
 
   fun executeAction(action: Action) {
     coroutineScope.launch {
