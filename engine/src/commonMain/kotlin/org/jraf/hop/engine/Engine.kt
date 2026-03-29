@@ -53,7 +53,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class Engine(
-  private val actionProviders: List<ActionProvider>,
+  private val actionProviders: Map<ActionProvider, Int>,
 ) {
   private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
   private val launchItemRepository = LaunchItemRepository()
@@ -62,7 +62,6 @@ class Engine(
 
   val actions: StateFlow<List<Action>> = combine(
     query
-//      .debounce(50.milliseconds)
       .map { query -> query.trimStart() }
       .distinctUntilChanged(),
     launchItemRepository.counters,
@@ -73,22 +72,34 @@ class Engine(
       if (query.isBlank()) {
         flowOf(emptyList())
       } else {
-        combine(actionProviders.map { it.provide(query).actions.defaultAfterTimeout(300.milliseconds, emptyList()) }) { actionsList ->
-          actionsList
-            .flatMap { it.map { action -> TrackingAction(action) } }
-            .sortedByDescending { counters[it.id]?.combined ?: 0 }
+        combine(
+          actionProviders.map { (provider, priority) ->
+            provider.provide(query).actions
+              .map { it.map { it to priority } }
+              .defaultAfterTimeout(300.milliseconds, emptyList())
+          },
+        ) { actionsListWithPriorities: Array<List<Pair<Action, Int>>> ->
+          actionsListWithPriorities
+            .flatMap { it.map { (action, priority) -> ActionWithPriorityAndTracking(action, priority) } }
+            .sortedByDescending { actionWithPriority ->
+              actionWithPriority.priority * 1_000_000L + (counters[actionWithPriority.id]?.combined ?: 0)
+            }
         }
       }
     }
     .stateIn(coroutineScope, SharingStarted.Lazily, emptyList())
 
   fun executeAction(action: Action) {
+    if (!action.isEnabled) return
     coroutineScope.launch {
       action.execute()
     }
   }
 
-  private inner class TrackingAction(private val action: Action) : Action by action {
+  private inner class ActionWithPriorityAndTracking(
+    private val action: Action,
+    val priority: Int,
+  ) : Action by action {
     override suspend fun execute() {
       launchItemRepository.recordLaunchedItem(id)
       action.execute()

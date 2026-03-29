@@ -27,7 +27,9 @@ package org.jraf.hop.action.wikipedia
 
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.ActionProvider
+import org.jraf.hop.action.ActionProvider.Result
 import org.jraf.hop.action.BaseAction
+import org.jraf.hop.action.action
 import org.jraf.hop.action.actions
 import org.jraf.hop.action.util.openUrl
 import org.jraf.hop.action.wikipedia.api.WikipediaApiClient
@@ -39,10 +41,10 @@ class WikipediaActionProvider(
 ) : ActionProvider {
   private val wikipediaApiClient = WikipediaApiClient()
 
-  override fun provide(query: String): ActionProvider.Result {
-    if (!query.startsWith(configuration.shortcut + " ", ignoreCase = true)) return ActionProvider.Result.Empty
+  override fun provide(query: String): Result {
+    if (query.trim().equals(configuration.shortcut, ignoreCase = true)) return action(WikipediaEmptyAction)
+    if (!query.startsWith(configuration.shortcut + " ", ignoreCase = true)) return Result.Empty
     val query = query.removePrefix(configuration.shortcut + " ").trim()
-    if (query.isBlank()) return ActionProvider.Result.Empty
     return actions {
       val actions = wikipediaApiClient.search(query).mapIndexed { index, searchResult ->
         WikipediaAction(
@@ -59,6 +61,15 @@ class WikipediaActionProvider(
   data class Configuration(
     val shortcut: String,
   )
+}
+
+private object WikipediaEmptyAction : BaseAction() {
+  override val id: String = "${this::class.qualifiedName!!}:empty"
+  override val primaryText = "Search Wikipedia"
+  override val secondaryText = null
+  override val icon = Action.Icon.UriIcon(ICON_URL)
+  override val isEnabled = false
+  override suspend fun execute() {}
 }
 
 private data class WikipediaAction(

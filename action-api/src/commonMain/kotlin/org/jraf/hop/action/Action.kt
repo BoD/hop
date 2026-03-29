@@ -37,6 +37,7 @@ interface Action {
   val primaryText: String
   val secondaryText: String?
   val icon: Icon?
+  val isEnabled: Boolean
 
   suspend fun execute()
 
@@ -49,6 +50,8 @@ interface Action {
 
 
 abstract class BaseAction : Action {
+  override val isEnabled: Boolean = true
+
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is BaseAction) return false

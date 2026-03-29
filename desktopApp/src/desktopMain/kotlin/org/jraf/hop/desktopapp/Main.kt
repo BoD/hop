@@ -75,20 +75,14 @@ fun main() {
   val hotKeyProvider = Provider.getCurrentProvider(false)
   val screenSize = getScreenSize()
   val engine = Engine(
-    listOf(
-      AppActionProvider(),
-      CalculatorActionProvider(),
+    mapOf(
+      AppActionProvider() to 1,
+      CalculatorActionProvider() to 1,
       UrlActionProvider(
         UrlActionProvider.Configuration(
           icon = UrlActionProvider.Configuration.Icon.Bundled.Brave,
         ),
-      ),
-      BookmarkActionProvider(
-        BookmarkActionProvider.Configuration(
-          pathToBrowser = "/Users/bod/Library/Application Support/BraveSoftware/Brave-Browser",
-          icon = BookmarkActionProvider.Configuration.Icon.Bundled.Brave,
-        ),
-      ),
+      ) to 1,
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "GitHub",
@@ -97,7 +91,7 @@ fun main() {
           urlPattern = "https://github.com/search?q={}&type=code",
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://github.githubassets.com/favicons/favicon.png"),
         ),
-      ),
+      ) to 1,
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "Apollo Kotlin",
@@ -106,7 +100,7 @@ fun main() {
           urlPattern = "https://github.com/apollographql/apollo-kotlin/pull/{}",
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://avatars.githubusercontent.com/u/17189275?s=48&v=4"),
         ),
-      ),
+      ) to 1,
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "WordReference en→fr",
@@ -115,7 +109,7 @@ fun main() {
           urlPattern = "https://www.wordreference.com/enfr/{}",
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://cdnawsw.wordreference.net/apple-touch-icon.png"),
         ),
-      ),
+      ) to 1,
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "WordReference fr→en",
@@ -124,14 +118,20 @@ fun main() {
           urlPattern = "https://www.wordreference.com/fren/{}",
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://cdnawsw.wordreference.net/apple-touch-icon.png"),
         ),
-      ),
+      ) to 1,
       WikipediaActionProvider(
         WikipediaActionProvider.Configuration(
           shortcut = "wiki",
         ),
-      ),
+      ) to 1,
+      BookmarkActionProvider(
+        BookmarkActionProvider.Configuration(
+          pathToBrowser = "/Users/bod/Library/Application Support/BraveSoftware/Brave-Browser",
+          icon = BookmarkActionProvider.Configuration.Icon.Bundled.Brave,
+        ),
+      ) to 1,
 
-      // Fallback, keep as last item
+      // Fallback, give it a priority of 0
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "Google",
@@ -140,7 +140,7 @@ fun main() {
           urlPattern = "https://www.google.com/search?q={}",
           icon = WebSearchActionProvider.Configuration.Icon.Bundled.Google,
         ),
-      ),
+      ) to 0,
     ),
   )
   application {

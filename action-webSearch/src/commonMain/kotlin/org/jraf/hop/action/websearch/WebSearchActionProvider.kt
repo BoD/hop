@@ -41,16 +41,10 @@ class WebSearchActionProvider(
 ) : ActionProvider {
   override fun provide(query: String): Result {
     return if (configuration.shortcut != null) {
-      if (query.startsWith(configuration.shortcut + " ", ignoreCase = true)) {
-        val query = query.removePrefix(configuration.shortcut + " ").trim()
-        if (query.isBlank()) {
-          Result.Empty
-        } else {
-          action(WebSearchAction(configuration, query))
-        }
-      } else {
-        Result.Empty
-      }
+      if (query.trim().equals(configuration.shortcut, ignoreCase = true)) return action(WebSearchEmptyAction(configuration))
+      if (!query.startsWith(configuration.shortcut + " ", ignoreCase = true)) return Result.Empty
+      val query = query.removePrefix(configuration.shortcut + " ").trim()
+      action(WebSearchAction(configuration, query))
     } else {
       if (query.isBlank()) {
         Result.Empty
@@ -75,6 +69,21 @@ class WebSearchActionProvider(
       class Url(val url: String) : Icon
     }
   }
+}
+
+private data class WebSearchEmptyAction(
+  private val configuration: WebSearchActionProvider.Configuration,
+) : BaseAction() {
+  override val id: String = "${this::class.qualifiedName!!}:empty"
+  override val primaryText = configuration.name
+  override val secondaryText = null
+  override val icon = when (configuration.icon) {
+    Icon.Bundled.Google -> Action.Icon.ResourceIcon(Res.drawable.google)
+    is Icon.Url -> Action.Icon.UriIcon(configuration.icon.url)
+  }
+  override val isEnabled = false
+
+  override suspend fun execute() {}
 }
 
 private data class WebSearchAction(

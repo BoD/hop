@@ -120,6 +120,7 @@ fun App(
         onKeyboardUp = viewModel::selectPreviousAction,
         onKeyboardEscape = { onDispose() },
         onKeyboardEnter = {
+          if (state.selectedAction?.isEnabled != true) return@QueryField
           viewModel.executeSelectedAction()
           onActionExecute()
         },
@@ -147,8 +148,9 @@ fun App(
             ActionItem(
               action = action,
               selected = isSelected,
-              onActionClick = {
-                viewModel.executeAction(it)
+              onActionClick = { action ->
+                if (!action.isEnabled) return@ActionItem
+                viewModel.executeAction(action)
                 onActionExecute()
               },
             )
