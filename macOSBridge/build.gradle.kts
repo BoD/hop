@@ -7,7 +7,7 @@ val generatedJvmResourcesDir = layout.buildDirectory.dir("generated/resources/jv
 val dylibOutputFile = generatedJvmResourcesDir.map { it.file("darwin-aarch64/libMacOSBridge.dylib") }
 
 val compileDylib: TaskProvider<Exec> by tasks.registering(Exec::class) {
-  val sourceFile = layout.projectDirectory.file("src/objective-c/MacOSBridge.m")
+  val sourceFile = layout.projectDirectory.file("src/swift/MacOSBridge.swift")
   val outputFile = dylibOutputFile.get().asFile
 
   inputs.file(sourceFile)
@@ -18,10 +18,11 @@ val compileDylib: TaskProvider<Exec> by tasks.registering(Exec::class) {
   }
 
   commandLine(
-    "clang",
-    "-dynamiclib",
+    "swiftc",
+    "-emit-library",
+    "-module-name", "MacOSBridge",
     "-framework", "AppKit",
-    "-framework", "CoreServices",
+    "-suppress-warnings",
     "-o", outputFile.absolutePath,
     sourceFile.asFile.absolutePath
   )
