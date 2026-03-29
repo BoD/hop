@@ -107,6 +107,24 @@ fun main() {
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://avatars.githubusercontent.com/u/17189275?s=48&v=4"),
         ),
       ),
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
+          name = "WordReference en→fr",
+          shortcut = "enfr",
+          primaryTextPattern = "Search for '{}'",
+          urlPattern = "https://www.wordreference.com/enfr/{}",
+          icon = WebSearchActionProvider.Configuration.Icon.Url("https://cdnawsw.wordreference.net/apple-touch-icon.png"),
+        ),
+      ),
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
+          name = "WordReference fr→en",
+          shortcut = "fren",
+          primaryTextPattern = "Search for '{}'",
+          urlPattern = "https://www.wordreference.com/fren/{}",
+          icon = WebSearchActionProvider.Configuration.Icon.Url("https://cdnawsw.wordreference.net/apple-touch-icon.png"),
+        ),
+      ),
       WikipediaActionProvider(
         WikipediaActionProvider.Configuration(
           shortcut = "wiki",
