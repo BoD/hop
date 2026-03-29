@@ -327,6 +327,10 @@ private fun ActionItem(
                 painterResource(Res.drawable.hop),
                 ColorFilter.tint(LocalContentColor.current.copy(alpha = 0.38f)),
               ),
+              error = ColorFilterPainter(
+                painterResource(Res.drawable.hop),
+                ColorFilter.tint(LocalContentColor.current.copy(alpha = 0.38f)),
+              ),
               contentDescription = null,
             )
           }
@@ -338,11 +342,12 @@ private fun ActionItem(
 }
 
 private class ColorFilterPainter(private val wrapped: Painter, private val colorFilter: ColorFilter) : Painter() {
-  override val intrinsicSize get() = wrapped.intrinsicSize
+  override val intrinsicSize: Size
+    get() = wrapped.intrinsicSize
 
   override fun DrawScope.onDraw() {
     with(wrapped) {
-      draw(intrinsicSize, colorFilter = colorFilter)
+      draw(size, colorFilter = colorFilter)
     }
   }
 }
