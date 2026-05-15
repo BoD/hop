@@ -31,7 +31,11 @@ import java.io.File
 import java.net.URI
 
 actual fun openApplication(path: Path) {
-  Desktop.getDesktop().open(File(path.toString()))
+  if (System.getProperty("os.name").startsWith("Mac")) {
+    ProcessBuilder("open", path.toString()).start()
+  } else {
+    Desktop.getDesktop().open(File(path.toString()))
+  }
 }
 
 actual fun openUrl(url: String) {
