@@ -41,9 +41,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tulskiy.keymaster.common.Provider
+import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jraf.hop.action.Action
 import org.jraf.hop.action.app.AppActionProvider
 import org.jraf.hop.action.bookmark.BookmarkActionProvider
 import org.jraf.hop.action.calculator.CalculatorActionProvider
@@ -73,7 +73,6 @@ fun main() {
   System.setProperty("apple.awt.enableTemplateImages", "true")
 
   val hotKeyProvider = Provider.getCurrentProvider(false)
-  val screenSize = getScreenSize()
   val engine = Engine(
     mapOf(
       AppActionProvider() to 1,
@@ -143,20 +142,24 @@ fun main() {
       ) to 0,
     ),
   )
+
   application {
     var isVisible by remember { mutableStateOf(true) }
     // Global hot-key
-    hotKeyProvider.register(KeyStroke.getKeyStroke("meta SPACE")) {
-      isVisible = !isVisible
+    LaunchedEffect(Unit) {
+      hotKeyProvider.register(KeyStroke.getKeyStroke("meta SPACE")) {
+        isVisible = !isVisible
+      }
     }
 
     val windowState = rememberWindowState(
       size = DpSize(WindowWidth, QueryFieldHeight),
-      position = getWindowPosition(WindowWidth, QueryFieldHeight, .33F),
     )
     if (isVisible) {
       Window(
-        state = windowState,
+        state = windowState.also {
+          it.position = getWindowPosition(WindowWidth, QueryFieldHeight, .33F)
+        },
         undecorated = true,
         transparent = true,
         title = stringResource(Res.string.app_name),
@@ -165,11 +168,10 @@ fun main() {
         },
       ) {
         // Adjust the size of the window based on the number of actions
-        val actions: List<Action> by engine.actions.collectAsState()
-        val actionsSize = actions.size
+        val actionsSize: Int by engine.actions.map { it.size }.collectAsState(0)
         LaunchedEffect(actionsSize) {
           val heightBasedOnActions = QueryFieldHeight + actionsSize * ActionItemHeight
-          val maxHeight = screenSize.height - window.location.y.dp
+          val maxHeight = getScreenSize().height - window.location.y.dp
           val height = heightBasedOnActions.coerceAtMost(maxHeight)
           windowState.size = DpSize(window.preferredSize.width.dp, height)
         }

@@ -25,4 +25,6 @@
 
 package org.jraf.hop.action.calculator
 
-internal expect fun eval(expression: String): Double
+import com.notkamui.keval.Keval
+
+internal fun eval(expression: String): Double = Keval.eval(expression)

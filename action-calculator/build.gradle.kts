@@ -17,12 +17,6 @@ kotlin {
         implementation(project(":action-util"))
         implementation(libs.compose.components.resources)
         implementation(libs.klibnanolog)
-      }
-    }
-
-    jvmMain {
-      dependencies {
-        // This is supposed to be a KMP lib, but at the moment macos artifacts are not available
         implementation(libs.keval)
       }
     }
