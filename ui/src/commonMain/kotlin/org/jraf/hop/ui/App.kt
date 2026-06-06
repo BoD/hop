@@ -275,10 +275,12 @@ private fun ActionItem(
   selected: Boolean,
   onActionClick: (Action) -> Unit,
 ) {
-  val colors = if (selected) {
-    ListItemDefaults.colors().copy(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
-  } else {
-    ListItemDefaults.colors()
+  val colors = ListItemDefaults.colors().let {
+    if (selected) {
+      it.copy(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest, selectedContainerColor = it.selectedContainerColor)
+    } else {
+      it
+    }
   }
   ListItem(
     modifier = Modifier
