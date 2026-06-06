@@ -33,6 +33,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -212,6 +213,10 @@ private fun QueryField(
         modifier = Modifier
           .padding(8.dp)
           .fillMaxWidth()
+          // - 16 dp for the padding, and - 2 dp for.... I don't know :(. Found it by trial and error.
+          // Without this, the height of the text field changes depending on whether it's empty or not.
+          // See https://youtrack.jetbrains.com/issue/CMP-8371/
+          .height(QueryFieldHeight - 16.dp - 2.dp)
           .focusRequester(focusRequester)
           .onPreviewKeyEvent {
             when (it.key) {
