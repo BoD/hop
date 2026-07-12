@@ -93,6 +93,15 @@ fun main() {
       ) to 1,
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
+          name = "GitHub JetBrains",
+          shortcut = "ghjb",
+          primaryTextPattern = "Search for '{}'",
+          urlPattern = "https://github.com/search?q=org%3AJetBrains%20{}&type=code",
+          icon = WebSearchActionProvider.Configuration.Icon.Url("https://github.githubassets.com/favicons/favicon.png"),
+        ),
+      ) to 1,
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
           name = "Apollo Kotlin",
           shortcut = "pr",
           primaryTextPattern = "Open Apollo Kotlin PR #{}",
@@ -129,7 +138,16 @@ fun main() {
           icon = BookmarkActionProvider.Configuration.Icon.Bundled.Brave,
         ),
       ) to 1,
-
+      WebSearchActionProvider(
+        WebSearchActionProvider.Configuration(
+          name = "Slackmojis",
+          shortcut = "sm",
+          primaryTextPattern = "Search for '{}'",
+          urlPattern = "https://slackmojis.com/emojis/search?query={}",
+          icon = WebSearchActionProvider.Configuration.Icon.Url("https://emojis.slackmojis.com/emojis/images/1643514689/6917/blob_smiley.png"),
+        ),
+      ) to 1,
+        
       // Fallback, give it a priority of 0
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
