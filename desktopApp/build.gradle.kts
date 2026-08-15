@@ -20,7 +20,7 @@ kotlin {
   }
 
   sourceSets {
-    val desktopMain by getting
+    val desktopMain = getByName("desktopMain")
 
     desktopMain.apply {
       dependencies {

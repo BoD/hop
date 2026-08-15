@@ -6,7 +6,9 @@ plugins {
 val generatedJvmResourcesDir = layout.buildDirectory.dir("generated/resources/jvmMain")
 val dylibOutputFile = generatedJvmResourcesDir.map { it.file("darwin-aarch64/libMacOSBridge.dylib") }
 
-val compileDylib: TaskProvider<Exec> by tasks.registering(Exec::class) {
+val compileDylib: TaskProvider<Exec> = tasks.register("compileDylib", Exec::class) {
+  description = "Compiles the Swift source code into a dynamic library (.dylib) for macOS."
+  group = "build"
   val sourceFile = layout.projectDirectory.file("src/swift/MacOSBridge.swift")
   val outputFile = dylibOutputFile.get().asFile
 

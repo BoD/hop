@@ -5,7 +5,8 @@ plugins {
 }
 
 // Generate a Version.kt file with a constant for the version name
-val generateVersionKt: TaskProvider<Task> by tasks.registering {
+val generateVersionKt: TaskProvider<Task> = tasks.register("generateVersionKt") {
+  description = "Generates a Version.kt file with a constant for the version name"
   val outputDir = layout.buildDirectory.dir("generated/source/kotlin").get().asFile
   outputs.dir(outputDir)
   val version = rootProject.version
