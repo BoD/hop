@@ -198,7 +198,7 @@ fun main() {
           val heightBasedOnActions = QueryFieldHeight + actionsSize * ActionItemHeight
           val maxHeight = getScreenSize().height - window.location.y.dp
           val height = heightBasedOnActions.coerceAtMost(maxHeight)
-          windowState.size = DpSize(window.preferredSize.width.dp, height)
+          windowState.size = DpSize(window.preferredSize!!.width.dp, height)
         }
 
         val focusRequester = remember { FocusRequester() }
