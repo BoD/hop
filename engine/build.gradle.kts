@@ -48,8 +48,9 @@ kotlin {
 sqldelight {
   databases {
     register("HopDatabase") {
-      packageName.set("org.jraf.hop.engine.db")
-      schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
+      srcDirs("src/commonMain/sqldelight/hop")
+      packageName.set("org.jraf.hop.engine.db.hop")
+      schemaOutputDirectory.set(file("src/commonMain/sqldelight/hop/databases"))
     }
   }
 }
@@ -60,4 +61,4 @@ tapmoc {
   checkDependencies()
 }
 
-// `./gradlew generateCommonMainHopDatabaseSchema` to generate the database schema (results in `src/commonMain/sqldelight/databases/`)
+// `./gradlew generateCommonMainHopDatabaseSchema` to generate the database schema (results in `src/commonMain/sqldelight/databases/hop`)

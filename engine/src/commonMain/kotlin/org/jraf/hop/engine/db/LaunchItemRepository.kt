@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import org.jraf.hop.engine.db.hop.HopDatabase
 
 private const val LONG_TERM_HISTORY_SIZE = 600L
 private const val LONG_TERM_WEIGHT = 1L
@@ -40,7 +41,7 @@ private const val LONG_TERM_WEIGHT = 1L
 private const val SHORT_TERM_HISTORY_SIZE = 20L
 private const val SHORT_TERM_WEIGHT = 3L
 
-internal class LaunchItemRepository() {
+internal class LaunchItemRepository {
   private val database: HopDatabase = HopDatabase(createSqlDriver())
 
   suspend fun recordLaunchedItem(id: String) {

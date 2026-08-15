@@ -40,6 +40,7 @@ include(
   ":action-util",
   ":action-app",
   ":action-bookmark",
+  ":action-browserHistory",
   ":action-url",
   ":action-webSearch",
   ":action-calculator",

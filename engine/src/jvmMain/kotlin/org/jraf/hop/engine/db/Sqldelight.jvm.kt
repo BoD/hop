@@ -27,6 +27,7 @@ package org.jraf.hop.engine.db
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import org.jraf.hop.engine.db.hop.HopDatabase
 import java.io.File
 import java.util.Properties
 

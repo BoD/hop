@@ -1,0 +1,16 @@
+CREATE TABLE urls(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT,
+    title TEXT,
+    visit_count INTEGER DEFAULT 0 NOT NULL,
+    typed_count INTEGER DEFAULT 0 NOT NULL,
+    last_visit_time INTEGER NOT NULL,
+    hidden INTEGER DEFAULT 0 NOT NULL
+);
+
+select:
+SELECT url, title
+FROM urls
+WHERE url LIKE '%' || :query || '%' OR title LIKE '%' || :query || '%'
+ORDER BY visit_count DESC
+LIMIT :historySize;

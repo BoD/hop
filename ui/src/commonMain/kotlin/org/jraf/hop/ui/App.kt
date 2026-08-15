@@ -79,6 +79,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -290,13 +291,17 @@ private fun ActionItem(
     headlineContent = {
       Text(
         text = action.primaryText,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
         maxLines = 1,
       )
     },
-    supportingContent = action.secondaryText?.let {
+    supportingContent = action.secondaryText?.let { secondaryText ->
       {
         Text(
-          text = action.secondaryText!!,
+          text = secondaryText,
+          softWrap = false,
+          overflow = TextOverflow.Ellipsis,
           maxLines = 1,
         )
       }

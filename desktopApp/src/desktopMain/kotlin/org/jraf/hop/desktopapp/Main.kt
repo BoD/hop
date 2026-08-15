@@ -46,6 +46,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jraf.hop.action.app.AppActionProvider
 import org.jraf.hop.action.bookmark.BookmarkActionProvider
+import org.jraf.hop.action.browserhistory.BrowserHistoryActionProvider
 import org.jraf.hop.action.calculator.CalculatorActionProvider
 import org.jraf.hop.action.url.UrlActionProvider
 import org.jraf.hop.action.websearch.WebSearchActionProvider
@@ -138,10 +139,16 @@ fun main() {
           icon = BookmarkActionProvider.Configuration.Icon.Bundled.Brave,
         ),
       ) to 1,
+      BrowserHistoryActionProvider(
+        BrowserHistoryActionProvider.Configuration(
+          pathToBrowser = "/Users/bod/Library/Application Support/BraveSoftware/Brave-Browser",
+          icon = BrowserHistoryActionProvider.Configuration.Icon.Bundled.Brave,
+        ),
+      ) to 1,
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
           name = "Slackmojis",
-          shortcut = "sm",
+          shortcut = "slackmojis",
           primaryTextPattern = "Search for '{}'",
           urlPattern = "https://slackmojis.com/emojis/search?query={}",
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://emojis.slackmojis.com/emojis/images/1643514689/6917/blob_smiley.png"),
