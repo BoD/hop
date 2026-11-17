@@ -43,6 +43,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -55,9 +57,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -76,14 +77,13 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.materialkolor.DynamicMaterialTheme
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
 import org.jraf.hop.action.Action
 import org.jraf.hop.action.Action.Icon.ImageBitmapIcon
@@ -182,12 +182,6 @@ private fun QueryField(
   onKeyboardEnter: () -> Unit,
   focusRequester: FocusRequester,
 ) {
-  var queryFieldValue by remember { mutableStateOf(TextFieldValue(queryText)) }
-  LaunchedEffect(queryText) {
-    if (queryText != queryFieldValue.text) {
-      queryFieldValue = TextFieldValue(queryText, TextRange(queryText.length))
-    }
-  }
   val textColor = LocalTextStyle.current.color.takeOrElse { OutlinedTextFieldDefaults.colors().focusedTextColor }
   val mergedTextStyle = LocalTextStyle.current.merge(
     TextStyle(
@@ -210,6 +204,12 @@ private fun QueryField(
       modifier = Modifier
         .background(color = MaterialTheme.colorScheme.surface, shape = OutlinedTextFieldDefaults.shape),
     ) {
+      val queryTextState = rememberTextFieldState(queryText)
+      LaunchedEffect(queryTextState) {
+        snapshotFlow { queryTextState.text.toString() }.collectLatest { query ->
+          onQueryChanged(query)
+        }
+      }
       BasicTextField(
         modifier = Modifier
           .padding(8.dp)
@@ -254,14 +254,10 @@ private fun QueryField(
               }
             }
           },
+        state = queryTextState,
         textStyle = mergedTextStyle,
-        value = queryFieldValue,
-        singleLine = true,
+        lineLimits = TextFieldLineLimits.SingleLine,
         cursorBrush = SolidColor(OutlinedTextFieldDefaults.colors().cursorColor),
-        onValueChange = { textFieldValue ->
-          queryFieldValue = textFieldValue
-          onQueryChanged(textFieldValue.text)
-        },
       )
       LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -288,14 +284,6 @@ private fun ActionItem(
       .clickable(onClick = { onActionClick(action) })
       .heightIn(min = ActionItemHeight)
       .fillMaxWidth(),
-    headlineContent = {
-      Text(
-        text = action.primaryText,
-        softWrap = false,
-        overflow = TextOverflow.Ellipsis,
-        maxLines = 1,
-      )
-    },
     supportingContent = action.secondaryText?.let { secondaryText ->
       {
         Text(
@@ -352,7 +340,14 @@ private fun ActionItem(
       }
     },
     colors = colors,
-  )
+  ) {
+    Text(
+      text = action.primaryText,
+      softWrap = false,
+      overflow = TextOverflow.Ellipsis,
+      maxLines = 1,
+    )
+  }
 }
 
 private class ColorFilterPainter(private val wrapped: Painter, private val colorFilter: ColorFilter) : Painter() {
