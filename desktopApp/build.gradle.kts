@@ -1,5 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -11,12 +10,6 @@ plugins {
 
 kotlin {
   jvm("desktop") {
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    binaries {
-      executable {
-        mainClass.set("org.jraf.hop.desktopapp.MainKt")
-      }
-    }
   }
 
   sourceSets {
@@ -24,11 +17,12 @@ kotlin {
 
     desktopMain.apply {
       dependencies {
-        implementation(compose.desktop.currentOs)
+        implementation(libs.compose.ui)
         implementation(libs.compose.components.resources)
         implementation(libs.kotlinx.coroutines.swing)
         implementation(libs.jkeymaster)
         implementation(libs.jna)
+        implementation(libs.logback)
 
         implementation(project(":macOSBridge"))
         implementation(project(":action-app"))
@@ -46,12 +40,15 @@ kotlin {
 
 compose.desktop {
   application {
-    mainClass = "org.jraf.hop.ui.MainKt"
+    mainClass = "org.jraf.hop.desktopapp.MainKt"
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
       packageName = "org.jraf.hop"
       packageVersion = rootProject.version.toString()
+
+      // Include `java.sql` in the bundled Java runtime, needed for SQLDelight
+      modules("java.sql")
 
       macOS {
         infoPlist {

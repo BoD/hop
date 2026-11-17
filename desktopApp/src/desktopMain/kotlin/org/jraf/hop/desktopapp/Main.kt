@@ -41,6 +41,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.tulskiy.keymaster.common.Provider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -66,6 +67,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
+import kotlin.time.Duration.Companion.seconds
 
 private val WindowWidth = 640.dp
 
@@ -154,7 +156,7 @@ fun main() {
           icon = WebSearchActionProvider.Configuration.Icon.Url("https://emojis.slackmojis.com/emojis/images/1643514689/6917/blob_smiley.png"),
         ),
       ) to 1,
-        
+
       // Fallback, give it a priority of 0
       WebSearchActionProvider(
         WebSearchActionProvider.Configuration(
@@ -169,18 +171,18 @@ fun main() {
   )
 
   application {
-    var isVisible by remember { mutableStateOf(true) }
+    var isWindowVisible by remember { mutableStateOf(true) }
     // Global hot-key
     LaunchedEffect(Unit) {
       hotKeyProvider.register(KeyStroke.getKeyStroke("meta SPACE")) {
-        isVisible = !isVisible
+        isWindowVisible = !isWindowVisible
       }
     }
 
     val windowState = rememberWindowState(
       size = DpSize(WindowWidth, QueryFieldHeight),
     )
-    if (isVisible) {
+    if (isWindowVisible) {
       Window(
         state = windowState.also {
           it.position = getWindowPosition(WindowWidth, QueryFieldHeight, .33F)
@@ -206,10 +208,10 @@ fun main() {
           engine = engine,
           focusRequester = focusRequester,
           onActionExecute = {
-            isVisible = false
+            isWindowVisible = false
           },
           onDispose = {
-            isVisible = false
+            isWindowVisible = false
             focusPreviousApplication()
           },
         )
@@ -224,7 +226,7 @@ fun main() {
             }
 
             override fun windowDeactivated(e: WindowEvent) {
-              isVisible = false
+              isWindowVisible = false
             }
           }
           window.addWindowListener(listener)
@@ -239,22 +241,30 @@ fun main() {
       }
     }
 
-    LaunchedEffect(isVisible) {
-      if (!isVisible) {
+    LaunchedEffect(isWindowVisible) {
+      if (!isWindowVisible) {
         // Reset query when hiding the window
         engine.query.value = ""
       }
     }
 
-    Tray(
-      painterResource(org.jraf.hop.ui.generated.resources.Res.drawable.hop),
-      tooltip = stringResource(Res.string.app_name),
-      onAction = {
-        isVisible = !isVisible
-      },
-      menu = {
-        Item("Exit", onClick = ::exitApplication)
-      },
-    )
+    // Showing the Tray icon before the Window is initialized causes a crash - just wait a bit before showing it
+    var isTrayIconVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+      delay(2.seconds)
+      isTrayIconVisible = true
+    }
+    if (isTrayIconVisible) {
+      Tray(
+        painterResource(org.jraf.hop.ui.generated.resources.Res.drawable.hop),
+        tooltip = stringResource(Res.string.app_name),
+        onAction = {
+          isWindowVisible = !isWindowVisible
+        },
+        menu = {
+          Item("Exit", onClick = ::exitApplication)
+        },
+      )
+    }
   }
 }
