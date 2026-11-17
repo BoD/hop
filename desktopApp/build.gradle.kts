@@ -44,13 +44,18 @@ compose.desktop {
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-      packageName = "org.jraf.hop"
+      packageName = "hop"
       packageVersion = rootProject.version.toString()
+      vendor = "Benoit 'BoD' Lubek"
+      copyright = "Copyright (C) 2026-present Benoit 'BoD' Lubek (BoD@JRAF.org)"
+      licenseFile.set(rootProject.file("COPYING"))
 
       // Include `java.sql` in the bundled Java runtime, needed for SQLDelight
       modules("java.sql")
 
       macOS {
+        iconFile.set(rootProject.file("etc/logo/hop.icns"))
+
         infoPlist {
           extraKeysRawXml = """
             <key>LSUIElement</key>

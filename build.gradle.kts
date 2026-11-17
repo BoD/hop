@@ -17,5 +17,5 @@ allprojects {
 
 // `./gradlew refreshVersions` to update dependencies
 // `./gradlew :desktopApp:run` to run the application
-// `./gradlew :desktopApp:createDistributable` to build the application (results in `desktopApp/build/compose/binaries/main/app/org.jraf.hop.app`)
-// `./gradlew :desktopApp:packageDistributionForCurrentOS` to package the application (results in `desktopApp/build/compose/binaries/main/dmg/org.jraf.hop-1.0.0.dmg`)
+// `./gradlew :desktopApp:createDistributable` to build the application (results in `desktopApp/build/compose/binaries/main/app/hop.app`)
+// `./gradlew :desktopApp:packageDistributionForCurrentOS` to package the application installer (results in `desktopApp/build/compose/binaries/main/dmg/hop-1.0.0.dmg`)
