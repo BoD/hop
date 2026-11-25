@@ -46,7 +46,7 @@ internal class LaunchItemRepository {
 
   suspend fun recordLaunchedItem(id: String) {
     withContext(Dispatchers.IO) {
-      database.launchedItemsQueries.insert(id)
+      database.launchedItemsQueries.insert(id).await()
     }
   }
 
