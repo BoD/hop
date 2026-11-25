@@ -4,18 +4,18 @@ plugins {
   alias(libs.plugins.tapmoc)
 }
 
-// Generate a Version.kt file with a constant for the version name
 val generateVersionKt: TaskProvider<Task> = tasks.register("generateVersionKt") {
-  description = "Generates a Version.kt file with a constant for the version name"
+  description = "Generates Version.kt"
   val outputDir = layout.buildDirectory.dir("generated/source/kotlin").get().asFile
   outputs.dir(outputDir)
-  val version = rootProject.version
+  val versionProvider = providers.provider { rootProject.version.toString() }
+  inputs.property("version", versionProvider)
   doFirst {
     val outputWithPackageDir = File(outputDir, "org/jraf/hop/engine").apply { mkdirs() }
     File(outputWithPackageDir, "Version.kt").writeText(
       """
         package org.jraf.hop.engine
-        const val VERSION = "v$version"
+        const val VERSION = "v${versionProvider.get()}"
       """.trimIndent()
     )
   }
